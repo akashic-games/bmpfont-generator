@@ -1,0 +1,8 @@
+{
+  "globalDependencies": {
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#58aa81d0f90b118c7dc9e6ab685e4c7aa75f1c72"
+  },
+  "dependencies": {
+    "commander": "registry:dt/commander#2.3.0+20161118092844"
+  }
+}

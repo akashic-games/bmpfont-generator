@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "noLib": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "outDir": "./lib"
+  },
+  "files": [
+    "./node_modules/typescript/lib/lib.es6.d.ts",
+    "./typings/opentype.js.d.ts",
+    "./typings/canvas.d.ts",
+    "./typings/pngquant.d.ts",
+    "./typings/index.d.ts",
+    "./src/bmpfont-generator.ts",
+    "./src/generator.ts",
+    "./src/index.ts",
+    "./src/util.ts"
+  ]
+}

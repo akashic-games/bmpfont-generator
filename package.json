@@ -1,0 +1,57 @@
+{
+  "name": "@akashic/bmpfont-generator",
+  "version": "3.2.3",
+  "description": "generate bitmap fonts from TrueType fonts",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "gulp clean && npm run install:typings && npm run build",
+    "install:typings": "typings install",
+    "clean:typings": "gulp clean:typings",
+    "build": "tsc -p .",
+    "lint": "gulp lint && gulp lint-md",
+    "test": "npm run install:typings && gulp test && npm run lint"
+  },
+  "bin": {
+    "bmpfont-generator": "./bin/bmpfont-generator"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akashic-games/bmpfont-generator.git"
+  },
+  "publishConfig": {
+    "@akashic:registry": "http://registry.npmjs.org/"
+  },
+  "files": [
+    "README.md",
+    "package.json",
+    "bin",
+    "lib"
+  ],
+  "author": "DWANGO Co., Ltd.",
+  "license": "MIT",
+  "dependencies": {
+    "canvas": "^1.2.2",
+    "commander": "^2.8.1",
+    "opentype.js": "0.4.7",
+    "pngquant": "^0.6.0"
+  },
+  "devDependencies": {
+    "blink-diff": "^1.0.12",
+    "del": "^1.1.1",
+    "gulp": "^3.8.11",
+    "gulp-istanbul": "~0.6.0",
+    "gulp-jasmine": "~2.0.0",
+    "gulp-shell": "^0.4.3",
+    "gulp-tslint": "4.3.2",
+    "jasmine": "^2.3.1",
+    "jasmine-reporters": "~2.0.4",
+    "jasmine-terminal-reporter": "~0.9.1",
+    "mdast": "^2.0.0",
+    "mdast-lint": "^1.1.1",
+    "mock-fs": "3.4.0",
+    "pngparse": "^2.0.1",
+    "tslint": "^3.10.2",
+    "typescript": "^1.7.5",
+    "typings": "^2.1.0"
+  }
+}
