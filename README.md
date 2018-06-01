@@ -17,6 +17,7 @@ $ npm install -g @akashic/bmpfont-generator
 ## 利用方法
 
 ビットマップフォントの描画に使用するTrueTypeフォント(ttf形式)のファイル名と、出力されるビットマップフォント(png形式)のファイル名を指定してください。
+Akashic Engineの詳細な利用方法については、 [公式ページ](https://akashic-games.github.io/) を参照してください。
 
 ```
 $ bmpfont-generator infile.ttf outfile.png
