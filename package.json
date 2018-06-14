@@ -19,7 +19,7 @@
     "url": "https://github.com/akashic-games/bmpfont-generator.git"
   },
   "publishConfig": {
-    "@akashic:registry": "http://registry.npmjs.org/"
+    "@akashic:registry": "https://registry.npmjs.org/"
   },
   "files": [
     "README.md",
