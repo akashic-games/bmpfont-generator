@@ -4,12 +4,14 @@
   "description": "generate bitmap fonts from TrueType fonts",
   "main": "lib/index.js",
   "scripts": {
-    "prepublish": "gulp clean && npm run install:typings && npm run build",
-    "install:typings": "typings install",
-    "clean:typings": "gulp clean:typings",
+    "prepare": "npm run build",
+    "clean": "rimraf lib",
     "build": "tsc -p .",
-    "lint": "gulp lint && gulp lint-md",
-    "test": "npm run install:typings && gulp test && npm run lint"
+    "test": "npm run build && npm run test:jasmine && npm run lint",
+    "lint": "npm run lint:ts && npm run lint:md",
+    "lint:ts": "tslint -c tslint.json src/**/*.ts",
+    "lint:md": "remark ./*.md --frail --no-stdout --quiet --rc-path ./.remarkrc",
+    "test:jasmine": "istanbul cover --report text --report html --colors -i ./lib/index.js ./node_modules/jasmine/bin/jasmine.js"
   },
   "bin": {
     "bmpfont-generator": "./bin/bmpfont-generator"
@@ -31,27 +33,22 @@
   "license": "MIT",
   "dependencies": {
     "canvas": "^1.2.2",
-    "commander": "^2.8.1",
+    "commander": "^2.16.0",
     "opentype.js": "0.4.7",
     "pngquant": "^0.6.0"
   },
   "devDependencies": {
+    "@types/node": "6.0.46",
     "blink-diff": "^1.0.12",
-    "del": "^1.1.1",
-    "gulp": "^3.8.11",
-    "gulp-istanbul": "~0.6.0",
-    "gulp-jasmine": "~2.0.0",
-    "gulp-shell": "^0.4.3",
-    "gulp-tslint": "4.3.2",
+    "istanbul": "^0.4.5",
     "jasmine": "^2.3.1",
-    "jasmine-reporters": "~2.0.4",
-    "jasmine-terminal-reporter": "~0.9.1",
-    "mdast": "^2.0.0",
     "mdast-lint": "^1.1.1",
-    "mock-fs": "3.4.0",
+    "mock-fs": "4.5.0",
     "pngparse": "^2.0.1",
+    "remark-cli": "^5.0.0",
+    "remark-lint": "^6.0.2",
+    "rimraf": "^2.6.2",
     "tslint": "^3.10.2",
-    "typescript": "^1.7.5",
-    "typings": "^2.1.0"
+    "typescript": "^2.9.2"
   }
 }
