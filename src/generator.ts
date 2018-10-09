@@ -114,7 +114,9 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 			if (index === glyphList.length - 1) {
 				mg = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};
 			} else {
-				dict[g.glyph.unicode] = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};
+				g.glyph.unicodes.forEach((unicode) => {
+					dict[unicode] = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};
+				});
 			}
 			drawX += drawWidth;
 		}
