@@ -17,14 +17,15 @@ interface CLIArgs {
 }
 
 export function generateBitmapFont(font: opentype.Font, outputPath: string, cliArgs: CLIArgs, callback: (err: any) => void): void {
-	var arr = Array.from(cliArgs.list);
 	var lostChars: string[] = [];
-	var glyphList: util.Glyph[] = font.stringToGlyphs(cliArgs.list).map((g: opentype.Glyph, index) => {
-		var scale = 1 / g.font.unitsPerEm * cliArgs.height;
-		if (g.unicodes.length === 0) {
-			lostChars.push(arr[index]);
-		}
-		return {glyph: g, width: Math.ceil(g.advanceWidth * scale)};
+	var glyphList: util.Glyph[] = [];
+	Array.from(cliArgs.list).forEach((char: string) => {
+		var glyph = font.stringToGlyphs(char);
+		glyph.forEach((g) => {
+			var scale = 1 / g.font.unitsPerEm * cliArgs.height;
+			if (g.unicodes.length === 0) lostChars.push(char);
+			glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
+		});
 	});
 
 	if (isNaN(cliArgs.baseline)) {
