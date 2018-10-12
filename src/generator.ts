@@ -17,7 +17,7 @@ interface CLIArgs {
 }
 
 export function generateBitmapFont(font: opentype.Font, outputPath: string, cliArgs: CLIArgs, callback: (err: any) => void): void {
-	var arr = arrayFromString(cliArgs.list);
+	var arr = Array.from(cliArgs.list);
 	var lostChars: string[] = [];
 	var glyphList: util.Glyph[] = font.stringToGlyphs(cliArgs.list).map((g: opentype.Glyph, index) => {
 		var scale = 1 / g.font.unitsPerEm * cliArgs.height;
@@ -87,8 +87,8 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	// 描画できなかった文字を通知
 	if (lostChars.length > 0) {
 		console.log(
-			"WARN: Cannot find " + lostChars.join(",") + " from requested font. " +
-			"Output image does not include these characters." +
+			"WARN: Cannot find " + lostChars.join(",") + " from the given font. " +
+			"Generated image does not include these characters." +
 			"Try Using other font or characters."
 		);
 	}
@@ -138,8 +138,4 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 	});
 
 	return {map: dict, missingGlyph: mg};
-}
-
-function arrayFromString(s: string) {
-	return Array.from(s) || s.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]?|[^\uD800-\uDFFF]|./g) || [];
 }
