@@ -86,7 +86,11 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 
 	// 描画できなかった文字を通知
 	if (lostChars.length > 0) {
-		console.log("cannot find " + lostChars.join(",") + " from requested font. output image does not include these characters.");
+		console.log(
+			"WARN: Cannot find " + lostChars.join(",") + " from requested font. " +
+			"Output image does not include these characters." +
+			"Try Using other font or characters."
+		);
 	}
 
 	util.outputBitmapFont(outputPath, canvas, cliArgs.quality, callback);
