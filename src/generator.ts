@@ -89,7 +89,7 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	if (lostChars.length > 0) {
 		console.log(
 			"WARN: Cannot find " + lostChars.join(",") + " from the given font. " +
-			"Generated image does not include these characters." +
+			"Generated image does not include these characters. " +
 			"Try Using other font or characters."
 		);
 	}
