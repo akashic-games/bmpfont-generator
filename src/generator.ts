@@ -22,8 +22,8 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	Array.from(cliArgs.list).forEach((char: string) => {
 		var glyph = font.stringToGlyphs(char);
 		glyph.forEach((g) => {
-			var scale = 1 / g.font.unitsPerEm * cliArgs.height;
 			if (g.unicodes.length === 0) lostChars.push(char);
+			var scale = 1 / g.font.unitsPerEm * cliArgs.height;
 			glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
 		});
 	});
