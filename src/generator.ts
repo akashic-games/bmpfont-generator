@@ -17,8 +17,13 @@ interface CLIArgs {
 }
 
 export function generateBitmapFont(font: opentype.Font, outputPath: string, cliArgs: CLIArgs, callback: (err: any) => void): void {
-	var glyphList: util.Glyph[] = font.stringToGlyphs(cliArgs.list).map((g: opentype.Glyph) => {
+	var arr = arrayFromString(cliArgs.list);
+	var lostChars: string[] = [];
+	var glyphList: util.Glyph[] = font.stringToGlyphs(cliArgs.list).map((g: opentype.Glyph, index) => {
 		var scale = 1 / g.font.unitsPerEm * cliArgs.height;
+		if (g.unicodes.length === 0) {
+			lostChars.push(arr[index]);
+		}
 		return {glyph: g, width: Math.ceil(g.advanceWidth * scale)};
 	});
 
@@ -123,4 +128,8 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 	});
 
 	return {map: dict, missingGlyph: mg};
+}
+
+function arrayFromString(s: string) {
+	return Array.from(s) || s.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]?|[^\uD800-\uDFFF]|./g) || [];
 }
