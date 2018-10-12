@@ -83,6 +83,12 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	if (cliArgs.json) {
 		fs.writeFileSync(cliArgs.json, util.createJson(drawResult.map, drawResult.missingGlyph, cliArgs.width, adjustedHeight));
 	}
+
+	// 描画できなかった文字を通知
+	if (lostChars.length > 0) {
+		console.log("cannot find " + lostChars.join(",") + " from requested font. output image does not include these characters.");
+	}
+
 	util.outputBitmapFont(outputPath, canvas, cliArgs.quality, callback);
 }
 
