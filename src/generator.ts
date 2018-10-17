@@ -17,9 +17,15 @@ interface CLIArgs {
 }
 
 export function generateBitmapFont(font: opentype.Font, outputPath: string, cliArgs: CLIArgs, callback: (err: any) => void): void {
-	var glyphList: util.Glyph[] = font.stringToGlyphs(cliArgs.list).map((g: opentype.Glyph) => {
-		var scale = 1 / g.font.unitsPerEm * cliArgs.height;
-		return {glyph: g, width: Math.ceil(g.advanceWidth * scale)};
+	var lostChars: string[] = [];
+	var glyphList: util.Glyph[] = [];
+	Array.from(cliArgs.list).forEach((char: string) => {
+		var glyph = font.stringToGlyphs(char);
+		glyph.forEach((g) => {
+			if (g.unicodes.length === 0) lostChars.push(char);
+			var scale = 1 / g.font.unitsPerEm * cliArgs.height;
+			glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
+		});
 	});
 
 	if (isNaN(cliArgs.baseline)) {
@@ -78,6 +84,16 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	if (cliArgs.json) {
 		fs.writeFileSync(cliArgs.json, util.createJson(drawResult.map, drawResult.missingGlyph, cliArgs.width, adjustedHeight));
 	}
+
+	// 描画できなかった文字を通知
+	if (lostChars.length > 0) {
+		console.log(
+			"WARN: Cannot find " + lostChars.join(",") + " from the given font. " +
+			"Generated image does not include these characters. " +
+			"Try Using other font or characters."
+		);
+	}
+
 	util.outputBitmapFont(outputPath, canvas, cliArgs.quality, callback);
 }
 
@@ -114,7 +130,9 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 			if (index === glyphList.length - 1) {
 				mg = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};
 			} else {
-				dict[g.glyph.unicode] = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};
+				g.glyph.unicodes.forEach((unicode) => {
+					dict[unicode] = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};
+				});
 			}
 			drawX += drawWidth;
 		}
