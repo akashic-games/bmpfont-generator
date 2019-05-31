@@ -20,6 +20,8 @@ interface CommandParameterObject {
 	baseine?: number;
 	quality?: number;
 	noAntiAlias?: boolean;
+	json?: string;
+	noJson?: boolean;
 }
 
 export function run(argv: string[]): void {
@@ -31,16 +33,16 @@ export function run(argv: string[]): void {
 		.option("-w, --fixed-width <size>", "文字の横サイズ(px)", Number)
 		.option("-c, --chars <string>", "書き出す文字の羅列",
 				"0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~")
+		.option("-f, --chars-file <filepath>", "書き出す文字が羅列されたテキストファイルのパス")
 		.option("-m, --missing-glyph <char>", "-lの指定に含まれない文字の代わりに用いる代替文字")
+		.option("-M, --missing-glyph-image <filepath>", "-lの指定に含まれない文字の代わりに用いる画像ファイルのパス")
 		.option("-F, --fill <fillstyle>", "フィルスタイル", "#000000")
 		.option("-S, --stroke <strokestyle>", "ストロークスタイル")
 		.option("-Q, --quality <quality>", "画質 1以上100以下", Number, null)
-		.option("-f, --chars-file <filepath>", "書き出す文字が羅列されたテキストファイルのパス")
-		.option("-M, --missing-glyph-image <filepath>", "-lの指定に含まれない文字の代わりに用いる画像ファイルのパス")
 		.option("--baseline <baseline>", "baselineの数値(px)", Number)
+		.option("--no-anti-alias", "アンチエイリアスを無効化する")
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
 		.option("--no-json", "jsonファイルを出力しない")
-		.option("--no-anti-alias", "アンチエイリアスを無効化する")
 		.parse(process.argv);
 
 		cli({
@@ -56,7 +58,9 @@ export function run(argv: string[]): void {
 			stroke: commander["stroke"],
 			baseine: commander["baseline"],
 			quality: commander["quality"],
-			noAntiAlias: commander["noAntiAlias"]
+			noAntiAlias: commander["noAntiAlias"],
+			json: commander["json"],
+			noJson: commander["noJson"]
 		});
 }
 
@@ -82,24 +86,13 @@ function cli(param: CommandParameterObject): void {
 		param.missingGlyph.src = fs.readFileSync(param.missingGlyphImage);
 	}
 	param.noAntiAlias = !!param.noAntiAlias;
-	const cliArgs: generator.CLIArgs = {
-		list: param.chars,
-		width: param.fixedWidth,
-		height: param.height,
-		missingGlyph: param.missingGlyph,
-		baseline: param.baseine,
-		noAntiAlias: param.noAntiAlias,
-		json: path.join(path.dirname(param.output), path.parse(param.output).name + "_glyphs.json"),
-		fill: param.fill,
-		stroke: param.stroke,
-		quality: param.quality
-	};
 
 	opentype.load(param.source, (err: any, font: opentype.Font) => {
 		if (err) {
 			console.error("could not load ", param.source, ":", err);
 			process.exit(1);
 		} else {
+			const jsonPath = param.json ? param.json : path.join(path.dirname(param.output), path.parse(param.output).name + "_glyphs.json");
 			const cliArgs: generator.CLIArgs = {
 				list: param.chars,
 				width: param.fixedWidth,
@@ -107,7 +100,7 @@ function cli(param: CommandParameterObject): void {
 				missingGlyph: param.missingGlyph,
 				baseline: param.baseine,
 				noAntiAlias: param.noAntiAlias,
-				json: path.join(path.dirname(param.output), path.parse(param.output).name, ".json"),
+				json: param.noJson ? undefined : jsonPath,
 				fill: param.fill,
 				stroke: param.stroke,
 				quality: param.quality
