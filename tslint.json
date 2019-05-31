@@ -42,7 +42,7 @@
     "no-duplicate-variable": false,
     "no-empty": true,
     "no-eval": true,
-    "no-string-literal": true,
+    "no-string-literal": false,
     "no-switch-case-fall-through": true,
     "trailing-comma": [true, {"multiline": "never", "singleline": "never"}],
     "no-trailing-whitespace": true,

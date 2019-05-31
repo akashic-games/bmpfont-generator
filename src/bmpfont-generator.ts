@@ -45,7 +45,7 @@ export function run(argv: string[]): void {
 		.option("--no-json", "jsonファイルを出力しない")
 		.parse(process.argv);
 
-		cli({
+	cli({
 			source: commander["source"],
 			output: commander["output"],
 			fixedWidth: commander["fixedWidth"],
@@ -117,7 +117,7 @@ function cli(param: CommandParameterObject): void {
 	});
 }
 
-function existCheck(path: string) {
+function existCheck(path: string): void {
 	if (!fs.existsSync(path)) {
 		console.error(path, "is not found");
 		process.exit(1);
