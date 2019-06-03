@@ -30,7 +30,7 @@ export function run(argv: string[]): void {
 		.option("-s, --source <filepath>", "フォントファイル(*.ttf)のパス")
 		.option("-o, --output <filepath>", "画像ファイルを書きだすパス")
 		.option("-H, --height <size>", "文字の縦サイズ(px)", Number, 13)
-		.option("-w, --fixed-width <size>", "文字の横サイズ(px)。指定した場合、文字の幅に関わらずsizeを幅の値とします", Number)
+		.option("-w, --fixed-width <size>", "文字の横サイズ(px)。指定した場合、文字の幅に関わらずsizeを幅の値とする", Number)
 		.option("-c, --chars <string>", "書き出す文字の羅列",
 				"0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~")
 		.option("-f, --chars-file <filepath>", "書き出す文字が羅列されたテキストファイルのパス")
