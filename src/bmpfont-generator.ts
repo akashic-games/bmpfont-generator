@@ -27,15 +27,15 @@ interface CommandParameterObject {
 export function run(argv: string[]): void {
 
 	commander
-		.option("-s, source <filepath>", "フォントファイルのパス")
+		.option("-s, --source <filepath>", "フォントファイル(*.ttf)のパス")
 		.option("-o, --output <filepath>", "画像ファイルを書きだすパス")
 		.option("-H, --height <size>", "文字の縦サイズ(px)", Number, 13)
-		.option("-w, --fixed-width <size>", "文字の横サイズ(px)", Number)
+		.option("-w, --fixed-width <size>", "文字の横サイズ(px)。指定した場合、文字の幅に関わらずsizeを幅の値とします", Number)
 		.option("-c, --chars <string>", "書き出す文字の羅列",
 				"0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~")
 		.option("-f, --chars-file <filepath>", "書き出す文字が羅列されたテキストファイルのパス")
-		.option("-m, --missing-glyph <char>", "-lの指定に含まれない文字の代わりに用いる代替文字")
-		.option("-M, --missing-glyph-image <filepath>", "-lの指定に含まれない文字の代わりに用いる画像ファイルのパス")
+		.option("-m, --missing-glyph <char>", "--charsの指定に含まれない文字の代わりに用いる代替文字")
+		.option("-M, --missing-glyph-image <filepath>", "--charsの指定に含まれない文字の代わりに用いる画像ファイルのパス")
 		.option("-F, --fill <fillstyle>", "フィルスタイル", "#000000")
 		.option("-S, --stroke <strokestyle>", "ストロークスタイル")
 		.option("-Q, --quality <quality>", "画質 1以上100以下", Number, null)
@@ -44,7 +44,6 @@ export function run(argv: string[]): void {
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
 		.option("--no-json", "jsonファイルを出力しない")
 		.parse(process.argv);
-
 	cli({
 			source: commander["source"],
 			output: commander["output"],
