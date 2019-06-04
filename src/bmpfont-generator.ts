@@ -116,9 +116,9 @@ function cli(param: CommandParameterObject): void {
 	});
 }
 
-function existCheck(path: string): void {
-	if (!fs.existsSync(path)) {
-		console.error(path, "is not found");
+function existCheck(filePath: string): void {
+	if (!fs.existsSync(filePath)) {
+		console.error(filePath, "is not found");
 		process.exit(1);
 	}
 };
