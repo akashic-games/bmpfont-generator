@@ -19,7 +19,7 @@ $ npm install -g @akashic/bmpfont-generator
 ビットマップフォントの描画に使用するTrueTypeフォント(ttf形式)のファイル名と、出力されるビットマップフォント(png形式)のファイル名を指定してください。
 
 ```
-$ bmpfont-generator --source infile.ttf --output outfile.png
+$ bmpfont-generator infile.ttf outfile.png
 ```
 
 ### ヘルプ
@@ -32,8 +32,6 @@ $ bmpfont-generator --help
 
 |       オプション            | 短縮名 |                   効果                        | 必須 | デフォルト値 |
 | :---------------------:    | :----: | :--------------------------------------:     | :--: | :--------------: |
-| `--source <filepath>`               |  `-s`  | フォントファイル(*.ttf)のパス                  |  〇  |                  |
-| `--output <filepath>`               |  `-o`  | 画像ファイルを書きだすパス                     |  〇  |                  |
 |  `--height <size>`                  |  `-H`  | 文字の縦サイズ(px)                            |      |   13             |
 |  `--fixed-width <size>`             |  `-w`  | 文字の横サイズ(px) 。指定した場合、文字の幅に関わらずsizeを幅の値とする |      |                  |
 |  `--chars <string>`                 |  `-c`  | 書きだす文字の羅列                             |      | 0-9,a-Z,各種記号 |
@@ -44,8 +42,8 @@ $ bmpfont-generator --help
 |  `--stroke <strokestyle>`           |  `-S`  | ストロークスタイル                            |      | `#000000`        |
 |  `--quality <quality>`              |  `-Q`  | 1-100の画質。指定する場合、 `pngquant` が必要  |      | 圧縮しない       |
 |  `--baseline <baseline>`            |        | ベースライン                                 |      | 自動で計算された値 |
-|  `--no-anti-alias <size>`           |        | アンチエイリアス無効化                        |      |                  |
-|  `--json <filepath>`                |        | jsonファイルを書き出すパス                    |      | sourceと同じパス  |
+|  `--no-anti-alias`                  |        | アンチエイリアス無効化                        |      |                  |
+|  `--json <filepath>`                |        | jsonファイルを書き出すパス                    |      | `<outfileName>_glyphs.json`  |
 |  `--no-json`                        |        | jsonファイルを出力しない                      |      |                  |
 
 ## ライセンス

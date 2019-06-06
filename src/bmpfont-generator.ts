@@ -27,8 +27,7 @@ interface CommandParameterObject {
 export function run(argv: string[]): void {
 
 	commander
-		.option("-s, --source <filepath>", "フォントファイル(*.ttf)のパス")
-		.option("-o, --output <filepath>", "画像ファイルを書きだすパス")
+		.usage("[options] infile.ttf outfile.png")
 		.option("-H, --height <size>", "文字の縦サイズ(px)", Number, 13)
 		.option("-w, --fixed-width <size>", "文字の横サイズ(px)。指定した場合、文字の幅に関わらずsizeを幅の値とする", Number)
 		.option("-c, --chars <string>", "書き出す文字の羅列",
@@ -44,23 +43,29 @@ export function run(argv: string[]): void {
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
 		.option("--no-json", "jsonファイルを出力しない")
 		.parse(process.argv);
+
+	if (commander.args.length < 2) {
+		console.error("invalid arguments");
+		process.exit(1);
+	}
+
 	cli({
-			source: commander["source"],
-			output: commander["output"],
-			fixedWidth: commander["fixedWidth"],
-			height: commander["height"],
-			chars: commander["chars"],
-			charsFile: commander["charsFile"],
-			missingGlyph: commander["missingGlyph"],
-			missingGlyphImage: commander["missingGlyphImage"],
-			fill: commander["fill"],
-			stroke: commander["stroke"],
-			baseine: commander["baseline"],
-			quality: commander["quality"],
-			noAntiAlias: commander["noAntiAlias"],
-			json: commander["json"],
-			noJson: commander["noJson"]
-		});
+		source: commander.args[0],
+		output: commander.args[1],
+		fixedWidth: commander["fixedWidth"],
+		height: commander["height"],
+		chars: commander["chars"],
+		charsFile: commander["charsFile"],
+		missingGlyph: commander["missingGlyph"],
+		missingGlyphImage: commander["missingGlyphImage"],
+		fill: commander["fill"],
+		stroke: commander["stroke"],
+		baseine: commander["baseline"],
+		quality: commander["quality"],
+		noAntiAlias: commander["noAntiAlias"],
+		json: commander["json"],
+		noJson: commander["noJson"]
+	});
 }
 
 function cli(param: CommandParameterObject): void {
@@ -74,7 +79,7 @@ function cli(param: CommandParameterObject): void {
 	// 任意オプション
 	if (param.charsFile) {
 		existCheck(param.charsFile);
-		var listFileContent = fs.readFileSync(param.charsFile);
+		const listFileContent = fs.readFileSync(param.charsFile);
 		param.chars = listFileContent.toString();
 	}
 	param.chars = param.chars.replace(/[\n\r]/g, "");
