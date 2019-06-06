@@ -25,8 +25,13 @@ interface CommandParameterObject {
 }
 
 export function run(argv: string[]): void {
+	const ver = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "package.json"), "utf8")).version;
 
 	commander
+		.version(ver);
+
+	commander
+		.description("generate bitmap fonts from TrueType fonts.")
 		.usage("[options] infile.ttf outfile.png")
 		.option("-H, --height <size>", "文字の縦サイズ(px)", Number, 13)
 		.option("-w, --fixed-width <size>", "文字の横サイズ(px)。指定した場合、文字の幅に関わらずsizeを幅の値とする", Number)
