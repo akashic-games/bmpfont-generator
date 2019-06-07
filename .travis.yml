@@ -3,9 +3,8 @@ script:
   - npm install
   - npm test
 node_js:
-  - 6.10
-  - 8.11
-  - 10.6
+  - 8
+  - 10
 addons:
   apt:
     sources:
