@@ -3,7 +3,7 @@ import fs = require("fs");
 import opentype = require("opentype.js");
 import Canvas = require("canvas");
 
-interface CLIArgs {
+export interface CLIArgs {
 	list: string;
 	width: number;
 	height: number;
