@@ -1,9 +1,9 @@
-import generator = require("./generator");
-import commander = require("commander");
-import fs = require("fs");
-import path = require("path");
-import opentype = require("opentype.js");
-import Canvas = require("canvas");
+import * as generator from "./generator";
+import * as commander from "commander";
+import * as fs from "fs";
+import * as path from "path";
+import * as opentype from "opentype.js";
+import * as Canvas from "canvas";
 var Image = Canvas.Image;
 
 interface CommandParameterObject {
@@ -131,4 +131,4 @@ function existCheck(filePath: string): void {
 		console.error(filePath, "is not found");
 		process.exit(1);
 	}
-};
+}

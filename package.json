@@ -7,11 +7,10 @@
     "prepare": "npm run build",
     "clean": "rimraf lib",
     "build": "tsc -p .",
-    "test": "npm run build && npm run test:jasmine && npm run lint",
+    "test": "npm run build && jest && npm run lint",
     "lint": "npm run lint:ts && npm run lint:md",
     "lint:ts": "tslint -c tslint.json src/**/*.ts",
-    "lint:md": "remark ./*.md --frail --no-stdout --quiet --rc-path ./.remarkrc",
-    "test:jasmine": "istanbul cover --report text --report html --colors -i ./lib/index.js ./node_modules/jasmine/bin/jasmine.js"
+    "lint:md": "remark ./*.md --frail --no-stdout --quiet --rc-path ./.remarkrc"
   },
   "bin": {
     "bmpfont-generator": "./bin/bmpfont-generator"
@@ -32,23 +31,22 @@
   "author": "DWANGO Co., Ltd.",
   "license": "MIT",
   "dependencies": {
-    "canvas": "^1.2.2",
-    "commander": "^2.16.0",
+    "canvas": "^2.6.1",
+    "commander": "^4.1.0",
     "opentype.js": "0.4.7",
-    "pngquant": "^0.6.0"
+    "pngquant": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "6.0.46",
+    "@types/node": "13.1.6",
+    "@types/jest": "24.0.25",
     "blink-diff": "^1.0.12",
-    "istanbul": "^0.4.5",
-    "jasmine": "^2.3.1",
-    "mdast-lint": "^1.1.1",
-    "mock-fs": "4.5.0",
+    "jest": "24.9.0",
+    "mock-fs": "4.10.4",
     "pngparse": "^2.0.1",
-    "remark-cli": "^5.0.0",
+    "remark-cli": "^7.0.0",
     "remark-lint": "^6.0.2",
-    "rimraf": "^2.6.2",
-    "tslint": "^3.10.2",
-    "typescript": "^2.9.2"
+    "rimraf": "^3.0.0",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.4"
   }
 }

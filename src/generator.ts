@@ -1,7 +1,12 @@
-import util = require("./util");
-import fs = require("fs");
-import opentype = require("opentype.js");
-import Canvas = require("canvas");
+// import util = require("./util");
+// import fs = require("fs");
+// import opentype = require("opentype.js");
+// import Canvas = require("canvas");
+
+import * as util from "./util";
+import * as fs from "fs";
+import * as opentype from "opentype.js";
+import * as Canvas from "canvas";
 
 export interface CLIArgs {
 	list: string;
@@ -71,7 +76,8 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 		return;
 	}
 
-	var canvas = new Canvas(canvasSize.width, canvasSize.height);
+	// var canvas = new Canvas(canvasSize.width, canvasSize.height);
+	const canvas = Canvas.createCanvas(canvasSize.width, canvasSize.height);
 	var ctx = canvas.getContext("2d");
 
 	if (cliArgs.noAntiAlias)
