@@ -1,9 +1,9 @@
-import * as generator from "./generator";
-import * as commander from "commander";
-import * as fs from "fs";
-import * as path from "path";
-import * as opentype from "opentype.js";
-import * as Canvas from "canvas";
+import generator = require("./generator");
+import commander = require("commander");
+import fs = require("fs");
+import path = require("path");
+import opentype = require("opentype.js");
+import Canvas = require("canvas");
 var Image = Canvas.Image;
 
 interface CommandParameterObject {

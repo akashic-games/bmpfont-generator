@@ -71,8 +71,7 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 		return;
 	}
 
-	// var canvas = new Canvas(canvasSize.width, canvasSize.height);
-	const canvas = Canvas.createCanvas(canvasSize.width, canvasSize.height);
+	var canvas = Canvas.createCanvas(canvasSize.width, canvasSize.height);
 	var ctx = canvas.getContext("2d");
 
 	if (cliArgs.noAntiAlias)
