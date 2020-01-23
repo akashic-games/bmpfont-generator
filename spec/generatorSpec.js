@@ -1,7 +1,7 @@
 var generator = require("../lib/generator");
 var util = require("../lib/util");
 var fs = require("fs");
-var mockfs = new require("mock-fs");
+var mockfs = require("mock-fs");
 var path = require("path");
 var opentype = require("opentype.js");
 var blinkDiff = require("blink-diff");
@@ -31,7 +31,7 @@ describe("generator.draw", function() {
 	it("normal scenario", function(done) {
 		var answerJson = require(path.resolve(__dirname, "fixtures/mplus-without-width-and-height.json"));
 		var answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus.png"));
-		var canvas = new Canvas(256, 256);
+		var canvas = Canvas.createCanvas(256, 256);
 		var ctx = canvas.getContext("2d");
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
@@ -49,7 +49,7 @@ describe("generator.draw", function() {
 				return g.glyph.yMin * scale;
 			}));
 			descend = Math.ceil(Math.abs(descend));
-			
+
 			var g = font.charToGlyph("?");
 			var scale = 1 / g.font.unitsPerEm * 20;
 			glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
@@ -74,7 +74,7 @@ describe("generator.draw without width", function() {
 	it("normal scenario", function(done) {
 		var answerJson = require(path.resolve(__dirname, "fixtures/mplus_ww.json"));
 		var answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus_ww.png"));
-		var canvas = new Canvas(256, 128);
+		var canvas = Canvas.createCanvas(256, 128);
 		var ctx = canvas.getContext("2d");
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
@@ -198,7 +198,7 @@ describe("generator.generateBitmapFont", function() {
 			});
 		});
 	});
-	
+
 	it("too big error scenario", function(done) {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();

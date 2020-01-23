@@ -131,4 +131,4 @@ function existCheck(filePath: string): void {
 		console.error(filePath, "is not found");
 		process.exit(1);
 	}
-};
+}

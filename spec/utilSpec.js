@@ -1,7 +1,7 @@
 var util = require("../lib/util");
 var path = require("path");
 var fs = require("fs");
-var mockfs = new require("mock-fs");
+var mockfs = require("mock-fs");
 var opentype = require("opentype.js");
 var pngparse = require("pngparse");
 var Canvas = require("canvas");
@@ -43,7 +43,7 @@ describe("util.calculateCanvasSizeWithoutWidth", function () {
 					var scale = 1 / g.glyph.font.unitsPerEm * height;
 					return g.glyph.yMax * scale;
 				})));
-				
+
 				var descend = Math.min.apply(Math, glyphList.map(function(g) {
 					var scale = 1 / g.glyph.font.unitsPerEm * height;
 					return g.glyph.yMin * scale;
@@ -63,14 +63,14 @@ describe("util.calculateCanvasSizeWithoutWidth", function () {
 
 describe("util.outputBitmapFont", function() {
 	it("normal scenario", function(done) {
-		var canvas = new Canvas(1, 1);
+		var canvas = Canvas.createCanvas(1, 1);
 		var ctx = canvas.getContext("2d");
 
 		var DUMMY_1x1_PNG_DATA = fs.readFileSync(path.resolve(__dirname, "fixtures/dummy1x1.png"));
 		var img = new Image;
 		img.src = DUMMY_1x1_PNG_DATA;
 		ctx.drawImage(img, 0, 0);
-		
+
 		mockfs({});
 		util.outputBitmapFont("dummy.png", canvas, null, function() {
 			pngparse.parseFile("dummy.png", function(err, data) {

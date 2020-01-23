@@ -9,7 +9,7 @@
   },
   "files": [
     "./typings/opentype.js.d.ts",
-    "./typings/canvas.d.ts",
+    "./node_modules/canvas/types/index.d.ts",
     "./typings/pngquant.d.ts",
     "./src/bmpfont-generator.ts",
     "./src/generator.ts",
