@@ -2,6 +2,9 @@ import opentype = require("opentype.js");
 import fs = require("fs");
 import PngQuant = require("pngquant");
 
+// canvas.heightを値の倍数にする
+const MULTIPLE_OF_CANVAS_HEIGHT = 4;
+
 export interface Glyph {
 	glyph: opentype.Glyph;
 	width: number;
@@ -19,9 +22,7 @@ export function calculateCanvasSize(text: string, charWidth: number, charHeight:
 	var canvasWidth = canvasSquareSideSize;
 	// 正方形じゃない場合があるのでcanvasSquareSideSizeは使えない
 	var tmpCanvasHeight = Math.ceil(textSize / Math.floor(canvasWidth / charWidth)) * charHeight;
-	var canvasHeight = 1;
-	for (; canvasHeight < tmpCanvasHeight; canvasHeight *= 2);
-
+	const canvasHeight = Math.ceil(tmpCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 	return {width: canvasWidth, height: canvasHeight};
 }
 
@@ -61,7 +62,7 @@ export function calculateCanvasSizeProportional(text: string,
 	var canvasSize = calculateCanvasSize(text, widthAverage, height);
 	// 文字が入りきるまで縦幅を増やす
 	while (!canGoIn(canvasSize, glyphList, charHeight)) {
-		canvasSize.height *= 2;
+		canvasSize.height += MULTIPLE_OF_CANVAS_HEIGHT;
 	}
 	return canvasSize;
 }
