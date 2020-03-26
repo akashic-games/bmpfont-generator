@@ -48,7 +48,7 @@ export function run(argv: string[]): void {
 		.option("--no-anti-alias", "アンチエイリアスを無効化する")
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
 		.option("--no-output-json", "jsonファイルを出力しない")
-		.option("--margin <margin>", "文字余白の数値(px)", Number, 1)
+		.option("--margin <margin>", "文字間の余白(px)", Number, 1)
 		.parse(process.argv);
 
 	if (commander.args.length < 2) {
