@@ -97,8 +97,6 @@ function cli(param: CommandParameterObject): void {
 		param.missingGlyph = new Image;
 		param.missingGlyph.src = fs.readFileSync(param.missingGlyphImage);
 	}
-	param.noAntiAlias = !param.noAntiAlias;
-	param.noJson = !param.noJson;
 
 	opentype.load(param.source, (err: any, font: opentype.Font) => {
 		if (err) {
@@ -113,7 +111,7 @@ function cli(param: CommandParameterObject): void {
 				missingGlyph: param.missingGlyph,
 				baseline: param.baseine,
 				noAntiAlias: param.noAntiAlias,
-				json: param.noJson ? undefined : jsonPath,
+				json: !param.noJson ? undefined : jsonPath,
 				fill: param.fill,
 				stroke: param.stroke,
 				quality: param.quality,

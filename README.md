@@ -45,7 +45,7 @@ $ bmpfont-generator --help
 |  `--no-anti-alias`                  |        | アンチエイリアス無効化                        |      |                  |
 |  `--json <filepath>`                |        | jsonファイルを書き出すパス                    |      | `<outfileName>_glyphs.json`  |
 |  `--no-output-json`                 |        | jsonファイルを出力しない                      |      |                  |
-|  `--margin`                         |        | 文字間の余白(px)                      |      |   1              |
+|  `--margin`                         |        | 文字間の余白(px)                              |      |   1              |
 
 ## ライセンス
 本リポジトリは MIT License の元で公開されています。

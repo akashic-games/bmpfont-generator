@@ -32,7 +32,6 @@ describe("util.calculateCanvasSizeWithoutWidth", function () {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			var textList = ["a", "ab", "abc", "abcd", "abcde", "abcdef", "abcdefg", "abcdefgh", "abcdefghi"];
-			// var answerList = [{width:32,height:24},{width:32,height:44},{width:32,height:44},{width:64,height:24},{width:64,height:44},{width:64,height:44},{width:64,height:48},{width:64,height:48},{width:64,height:48}]
 			var answerList = [{width:32,height:24},{width:32,height:44},{width:64,height:24},{width:64,height:44},{width:64,height:44},{width:64,height:44},{width:64,height:44},{width:64,height:64},{width:64,height:44}]
 			textList.forEach(function(text, index) {
 				var glyphList = font.stringToGlyphs(text).map(function(g) {
