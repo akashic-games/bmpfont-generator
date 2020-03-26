@@ -10,34 +10,38 @@ export interface Glyph {
 	width: number;
 }
 
-export function calculateCanvasSize(text: string, charWidth: number, charHeight: number): {width: number; height: number} {
+export function calculateCanvasSize(text: string, charWidth: number, charHeight: number, margin: number): {width: number; height: number} {
 	if (charWidth <= 0 || charHeight <= 0) {
 		return {width: -1, height: -1};
 	}
 	// +1しているのはmissing glyph用
 	var textSize = text.split("").length + 1;
 	var canvasSquareSideSize = 1;
+
+	const tmpWidth = charWidth + margin;
+	const tmpHeight = charHeight + margin;
 	// 文字が入りきる正方形の辺の長さを求める
-	for (; (canvasSquareSideSize / charWidth) * (canvasSquareSideSize / charHeight) < textSize; canvasSquareSideSize *= 2);
+	for (; (canvasSquareSideSize / tmpWidth) * (canvasSquareSideSize / tmpHeight) < textSize; canvasSquareSideSize *= 2);
 	var canvasWidth = canvasSquareSideSize;
 	// 正方形じゃない場合があるのでcanvasSquareSideSizeは使えない
-	var tmpCanvasHeight = Math.ceil(textSize / Math.floor(canvasWidth / charWidth)) * charHeight;
+	var tmpCanvasHeight = Math.ceil(textSize / Math.floor(canvasWidth / tmpWidth)) * tmpHeight;
 	const canvasHeight = Math.ceil(tmpCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 	return {width: canvasWidth, height: canvasHeight};
 }
 
 export function canGoIn(canvasSize: {width: number; height: number},
                         glyphList: Glyph[],
-                        charHeight: number): boolean {
-	var drawX = 0;
-	var drawY = 0;
+                        charHeight: number,
+                        margin: number): boolean {
+	var drawX = margin;
+	var drawY = margin;
 
 	glyphList.forEach((g: Glyph) => {
 		if (drawX + g.width > canvasSize.width) {
-			drawX = 0;
-			drawY += charHeight;
+			drawX = margin;
+			drawY += charHeight + margin;
 		}
-		drawX += g.width;
+		drawX += g.width + margin;
 	});
 	return drawY + charHeight < canvasSize.height;
 }
@@ -45,13 +49,14 @@ export function canGoIn(canvasSize: {width: number; height: number},
 export function calculateCanvasSizeProportional(text: string,
                                                 glyphList: Glyph[],
                                                 height: number,
-                                                charHeight: number): {width: number; height: number} {
+                                                charHeight: number,
+                                                margin: number ): {width: number; height: number} {
 	var widthAverage = 0;
 	var widthMax = 0;
 	glyphList.forEach((g: Glyph) => {
 		if (g.width > widthMax)
-			widthMax = g.width;
-		widthAverage += g.width;
+			widthMax = g.width + margin;
+		widthAverage += g.width  + margin;
 	});
 	widthAverage /= glyphList.length;
 
@@ -59,9 +64,9 @@ export function calculateCanvasSizeProportional(text: string,
 		return {width: -1, height: -1};
 	}
 	// 平均値を利用して目安となるサイズを計算
-	var canvasSize = calculateCanvasSize(text, widthAverage, height);
+	var canvasSize = calculateCanvasSize(text, widthAverage, height, margin);
 	// 文字が入りきるまで縦幅を増やす
-	while (!canGoIn(canvasSize, glyphList, charHeight)) {
+	while (!canGoIn(canvasSize, glyphList, charHeight, margin)) {
 		canvasSize.height += MULTIPLE_OF_CANVAS_HEIGHT;
 	}
 	return canvasSize;

@@ -22,6 +22,7 @@ interface CommandParameterObject {
 	noAntiAlias?: boolean;
 	json?: string;
 	noJson?: boolean;
+	margin?: number;
 }
 
 export function run(argv: string[]): void {
@@ -46,7 +47,8 @@ export function run(argv: string[]): void {
 		.option("--baseline <baseline>", "baselineの数値(px)", Number)
 		.option("--no-anti-alias", "アンチエイリアスを無効化する")
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
-		.option("--no-json", "jsonファイルを出力しない")
+		.option("--no-output-json", "jsonファイルを出力しない")
+		.option("--margin <margin>", "文字余白の数値(px)", Number, 1)
 		.parse(process.argv);
 
 	if (commander.args.length < 2) {
@@ -67,9 +69,10 @@ export function run(argv: string[]): void {
 		stroke: commander["stroke"],
 		baseine: commander["baseline"],
 		quality: commander["quality"],
-		noAntiAlias: commander["noAntiAlias"],
+		noAntiAlias: commander["antiAlias"],
 		json: commander["json"],
-		noJson: commander["noJson"]
+		noJson: commander["outputJson"],
+		margin: commander["margin"]
 	});
 }
 
@@ -94,7 +97,8 @@ function cli(param: CommandParameterObject): void {
 		param.missingGlyph = new Image;
 		param.missingGlyph.src = fs.readFileSync(param.missingGlyphImage);
 	}
-	param.noAntiAlias = !!param.noAntiAlias;
+	param.noAntiAlias = !param.noAntiAlias;
+	param.noJson = !param.noJson;
 
 	opentype.load(param.source, (err: any, font: opentype.Font) => {
 		if (err) {
@@ -112,7 +116,8 @@ function cli(param: CommandParameterObject): void {
 				json: param.noJson ? undefined : jsonPath,
 				fill: param.fill,
 				stroke: param.stroke,
-				quality: param.quality
+				quality: param.quality,
+				margin: param.margin
 			};
 			generator.generateBitmapFont(font, param.output, cliArgs, (err: any) => {
 				if (err) {
