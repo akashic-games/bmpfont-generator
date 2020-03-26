@@ -18,13 +18,13 @@ export function calculateCanvasSize(text: string, charWidth: number, charHeight:
 	var textSize = text.split("").length + 1;
 	var canvasSquareSideSize = 1;
 
-	const tmpWidth = charWidth + margin;
-	const tmpHeight = charHeight + margin;
+	const advanceWidth = charWidth + margin;
+	const advanceHeight = charHeight + margin;
 	// 文字が入りきる正方形の辺の長さを求める
-	for (; (canvasSquareSideSize / tmpWidth) * (canvasSquareSideSize / tmpHeight) < textSize; canvasSquareSideSize *= 2);
+	for (; (canvasSquareSideSize / advanceWidth) * (canvasSquareSideSize / advanceHeight) < textSize; canvasSquareSideSize *= 2);
 	var canvasWidth = canvasSquareSideSize;
 	// 正方形じゃない場合があるのでcanvasSquareSideSizeは使えない
-	var tmpCanvasHeight = Math.ceil(textSize / Math.floor(canvasWidth / tmpWidth)) * tmpHeight;
+	var tmpCanvasHeight = Math.ceil(textSize / Math.floor(canvasWidth / advanceWidth)) * advanceHeight;
 	const canvasHeight = Math.ceil(tmpCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 	return {width: canvasWidth, height: canvasHeight};
 }
