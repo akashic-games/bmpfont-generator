@@ -77,7 +77,7 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	var canvas = Canvas.createCanvas(canvasSize.width, canvasSize.height);
 	var ctx = canvas.getContext("2d");
 
-	if (!cliArgs.noAntiAlias)
+	if (cliArgs.noAntiAlias)
 		ctx.antialias = "none";
 
 	// 描画

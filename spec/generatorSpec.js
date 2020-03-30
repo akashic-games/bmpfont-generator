@@ -146,7 +146,7 @@ describe("generator.generateBitmapFont", function() {
 				stroke: undefined,
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: true,
+				noAntiAlias: false,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
@@ -179,7 +179,7 @@ describe("generator.generateBitmapFont", function() {
 				stroke: undefined,
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: false,
+				noAntiAlias: true,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
@@ -212,7 +212,7 @@ describe("generator.generateBitmapFont", function() {
 				stroke: undefined,
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: true,
+				noAntiAlias: false,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
@@ -245,7 +245,7 @@ describe("generator.generateBitmapFont", function() {
 				stroke: "#0000ff",
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: true,
+				noAntiAlias: false,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
@@ -276,7 +276,7 @@ describe("generator.generateBitmapFont", function() {
 				stroke: undefined,
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: true,
+				noAntiAlias: false,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
@@ -301,7 +301,7 @@ describe("generator.generateBitmapFont", function() {
 				stroke: undefined,
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: true,
+				noAntiAlias: false,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
@@ -330,7 +330,7 @@ describe("generator.generateBitmapFont without width", function() {
 				stroke: undefined,
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: true,
+				noAntiAlias: false,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
@@ -367,7 +367,7 @@ describe("generator.generateBitmapFont defaultMissingGlyph", function() {
 				stroke: undefined,
 				baseline: NaN,
 				json: "result.json",
-				noAntiAlias: true,
+				noAntiAlias: false,
 				margin: 1
 			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {

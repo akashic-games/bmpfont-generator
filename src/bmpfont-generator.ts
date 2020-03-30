@@ -69,9 +69,9 @@ export function run(argv: string[]): void {
 		stroke: commander["stroke"],
 		baseine: commander["baseline"],
 		quality: commander["quality"],
-		noAntiAlias: commander["antiAlias"],
+		noAntiAlias: !commander["antiAlias"],
 		json: commander["json"],
-		noJson: commander["outputJson"],
+		noJson: !commander["outputJson"],
 		margin: commander["margin"]
 	});
 }
@@ -111,7 +111,7 @@ function cli(param: CommandParameterObject): void {
 				missingGlyph: param.missingGlyph,
 				baseline: param.baseine,
 				noAntiAlias: param.noAntiAlias,
-				json: !param.noJson ? undefined : jsonPath,
+				json: param.noJson ? undefined : jsonPath,
 				fill: param.fill,
 				stroke: param.stroke,
 				quality: param.quality,
