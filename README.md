@@ -44,7 +44,7 @@ $ bmpfont-generator --help
 |  `--baseline <baseline>`            |        | ベースライン                                 |      | 自動で計算された値 |
 |  `--no-anti-alias`                  |        | アンチエイリアス無効化                        |      |                  |
 |  `--json <filepath>`                |        | jsonファイルを書き出すパス                    |      | `<outfileName>_glyphs.json`  |
-|  `--no--json`                       |        | jsonファイルを出力しない                      |      |                  |
+|  `--no-json`                        |        | jsonファイルを出力しない                      |      |                  |
 |  `--margin`                         |        | 文字間の余白(px)                              |      |   1              |
 
 ## ライセンス
