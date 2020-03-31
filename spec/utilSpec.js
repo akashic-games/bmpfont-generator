@@ -9,20 +9,20 @@ var Image = Canvas.Image;
 
 describe("util.calculateCanvasSize", function () {
 	it("normal scenario", function () {
-		expect(util.calculateCanvasSize("", 16, 13)).toEqual({width:16, height:16});
-		expect(util.calculateCanvasSize("a",16,13)).toEqual({width:32, height:16});
-		expect(util.calculateCanvasSize("ab", 16, 13)).toEqual({width:32, height:28});
-		expect(util.calculateCanvasSize("abc", 16, 13)).toEqual({width:32, height:28});
-		expect(util.calculateCanvasSize("abcd", 16, 13)).toEqual({width:64, height:28});
-		expect(util.calculateCanvasSize("abcde", 16, 13)).toEqual({width:64, height:28});
-		expect(util.calculateCanvasSize("abcdef", 16, 13)).toEqual({width:64, height:28});
-		expect(util.calculateCanvasSize("abcdefg", 16, 13)).toEqual({width:64, height:28});
-		expect(util.calculateCanvasSize("abcdefgh", 16, 13)).toEqual({width:64, height:40});
+		expect(util.calculateCanvasSize("", 16, 13, 0, 1)).toEqual({width:16, height:16});
+		expect(util.calculateCanvasSize("a", 16, 13, 0, 1)).toEqual({width:32, height:16});
+		expect(util.calculateCanvasSize("ab", 16, 13, 0, 1)).toEqual({width:32, height:28});
+		expect(util.calculateCanvasSize("abc", 16, 13, 0, 1)).toEqual({width:32, height:28});
+		expect(util.calculateCanvasSize("abcd", 16, 13, 0, 1)).toEqual({width:64, height:28});
+		expect(util.calculateCanvasSize("abcde", 16, 13, 0, 1)).toEqual({width:64, height:28});
+		expect(util.calculateCanvasSize("abcdef", 16, 13, 0, 1)).toEqual({width:64, height:28});
+		expect(util.calculateCanvasSize("abcdefg", 16, 13, 0, 1)).toEqual({width:64, height:28});
+		expect(util.calculateCanvasSize("abcdefgh", 16, 13, 0, 1)).toEqual({width:64, height:40});
 	});
 
 	it("exception scenario", function () {
-		expect(util.calculateCanvasSize("", 0, 0)).toEqual({width:-1, height:-1});
-		expect(util.calculateCanvasSize("", -10, -10)).toEqual({width:-1, height:-1});
+		expect(util.calculateCanvasSize("", 0, 0, 0, 1)).toEqual({width:-1, height:-1});
+		expect(util.calculateCanvasSize("", -10, -10, 0, 1)).toEqual({width:-1, height:-1});
 	});
 });
 
@@ -32,7 +32,7 @@ describe("util.calculateCanvasSizeWithoutWidth", function () {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			var textList = ["a", "ab", "abc", "abcd", "abcde", "abcdef", "abcdefg", "abcdefgh", "abcdefghi"];
-			var answerList = [{width:32,height:20},{width:32,height:40},{width:32,height:40},{width:64,height:20},{width:64,height:40},{width:64,height:40},{width:64,height:44},{width:64,height:44},{width:64,height:44}]
+			var answerList = [{width:32,height:24},{width:32,height:44},{width:64,height:24},{width:64,height:44},{width:64,height:44},{width:64,height:44},{width:64,height:44},{width:64,height:64},{width:64,height:44}]
 			textList.forEach(function(text, index) {
 				var glyphList = font.stringToGlyphs(text).map(function(g) {
 					var scale = 1 / g.font.unitsPerEm * height;
@@ -54,7 +54,7 @@ describe("util.calculateCanvasSizeWithoutWidth", function () {
 				if (extraDescend > 0) {
 					adjustedHeight += extraDescend;
 				}
-				expect(util.calculateCanvasSizeProportional(text, glyphList, adjustedHeight, baseline + descend)).toEqual(answerList[index]);
+				expect(util.calculateCanvasSizeProportional(text, glyphList, adjustedHeight, baseline + descend, 1)).toEqual(answerList[index]);
 			});
 			done();
 		});

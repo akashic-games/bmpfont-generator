@@ -21,7 +21,7 @@ interface CommandParameterObject {
 	quality?: number;
 	noAntiAlias?: boolean;
 	json?: string;
-	noJson?: boolean;
+	margin?: number;
 }
 
 export function run(argv: string[]): void {
@@ -47,6 +47,7 @@ export function run(argv: string[]): void {
 		.option("--no-anti-alias", "アンチエイリアスを無効化する")
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
 		.option("--no-json", "jsonファイルを出力しない")
+		.option("--margin <margin>", "文字間の余白(px)", Number, 1)
 		.parse(process.argv);
 
 	if (commander.args.length < 2) {
@@ -67,9 +68,9 @@ export function run(argv: string[]): void {
 		stroke: commander["stroke"],
 		baseine: commander["baseline"],
 		quality: commander["quality"],
-		noAntiAlias: commander["noAntiAlias"],
-		json: commander["json"],
-		noJson: commander["noJson"]
+		noAntiAlias: !commander["antiAlias"],
+		json: commander["json"] ?? path.join(path.dirname(commander.args[1]), path.parse(commander.args[1]).name + "_glyphs.json"),
+		margin: commander["margin"]
 	});
 }
 
@@ -94,14 +95,12 @@ function cli(param: CommandParameterObject): void {
 		param.missingGlyph = new Image;
 		param.missingGlyph.src = fs.readFileSync(param.missingGlyphImage);
 	}
-	param.noAntiAlias = !!param.noAntiAlias;
 
 	opentype.load(param.source, (err: any, font: opentype.Font) => {
 		if (err) {
 			console.error("could not load ", param.source, ":", err);
 			process.exit(1);
 		} else {
-			const jsonPath = param.json ? param.json : path.join(path.dirname(param.output), path.parse(param.output).name + "_glyphs.json");
 			const cliArgs: generator.CLIArgs = {
 				list: param.chars,
 				width: param.fixedWidth,
@@ -109,10 +108,11 @@ function cli(param: CommandParameterObject): void {
 				missingGlyph: param.missingGlyph,
 				baseline: param.baseine,
 				noAntiAlias: param.noAntiAlias,
-				json: param.noJson ? undefined : jsonPath,
+				json: param.json ? param.json : undefined,
 				fill: param.fill,
 				stroke: param.stroke,
-				quality: param.quality
+				quality: param.quality,
+				margin: param.margin
 			};
 			generator.generateBitmapFont(font, param.output, cliArgs, (err: any) => {
 				if (err) {

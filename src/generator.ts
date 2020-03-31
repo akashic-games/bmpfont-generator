@@ -14,6 +14,7 @@ export interface CLIArgs {
 	fill: string;
 	stroke: string;
 	quality: number;
+	margin: number;
 }
 
 export function generateBitmapFont(font: opentype.Font, outputPath: string, cliArgs: CLIArgs, callback: (err: any) => void): void {
@@ -32,6 +33,8 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 		cliArgs.baseline = util.getMaxBaseline(glyphList, cliArgs.height);
 	}
 
+	if (isNaN(cliArgs.margin)) cliArgs.margin = 1;
+
 	// missingGlyphをglyphListに追加しつつ、ベースライン値を更新
 	if (cliArgs.missingGlyph === undefined || typeof cliArgs.missingGlyph === "string") {
 		var g = font.glyphs[0];
@@ -43,8 +46,8 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 			cliArgs.baseline = Math.ceil(g.yMax * scale);
 	}
 
-	var descend = util.getMinDescend(glyphList, cliArgs.height);
-	var adjustedHeight = util.getAdjustedHeight(descend, cliArgs.height, cliArgs.baseline);
+	var descend = util.getMinDescend(glyphList, cliArgs.height + cliArgs.margin );
+	var adjustedHeight = util.getAdjustedHeight(descend, cliArgs.height + cliArgs.margin, cliArgs.baseline);
 
 	// missingGlyphが画像の場合の処理
 	if (typeof cliArgs.missingGlyph !== "string" && cliArgs.missingGlyph !== undefined) {
@@ -56,9 +59,9 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	// 必要なcanvasのサイズを算出する
 	var canvasSize: {width: number; height: number} = undefined;
 	if (cliArgs.width === undefined) {
-		canvasSize = util.calculateCanvasSizeProportional(cliArgs.list, glyphList, adjustedHeight, cliArgs.baseline + descend);
+		canvasSize = util.calculateCanvasSizeProportional(cliArgs.list, glyphList, adjustedHeight, cliArgs.baseline + descend, cliArgs.margin);
 	} else {
-		canvasSize = util.calculateCanvasSize(cliArgs.list, cliArgs.width, adjustedHeight);
+		canvasSize = util.calculateCanvasSize(cliArgs.list, cliArgs.width, adjustedHeight, cliArgs.margin);
 	}
 
 	// 作成されたcanvasのサイズが正当なものか確認
@@ -103,8 +106,8 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 } {
 	var dict: {[key: number]: {x: number; y: number, width?: number, height?: number}} = {};
 
-	var drawX = 0;
-	var drawY = 0;
+	var drawX = cliArgs.margin;
+	var drawY = cliArgs.margin;
 	var drawHeight = cliArgs.baseline + descend;
 	var mg: {x: number; y: number; width: number; height: number; } = undefined;
 
@@ -117,11 +120,11 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 		} else {
 			var drawWidth = cliArgs.width;
 			if (drawWidth === undefined) {
-				drawWidth = g.width;
+				drawWidth = g.width + cliArgs.margin;
 			}
 			if (drawX + drawWidth > ctx.canvas.width) {
-				drawX = 0;
-				drawY += drawHeight;
+				drawX = cliArgs.margin;
+				drawY += drawHeight + cliArgs.margin;
 			}
 			var path = g.glyph.getPath(drawX + (drawWidth / 2) - (g.width / 2), drawY + cliArgs.baseline, cliArgs.height);
 			path.fill = cliArgs.fill;
@@ -134,7 +137,7 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 					dict[unicode] = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};
 				});
 			}
-			drawX += drawWidth;
+			drawX += drawWidth + cliArgs.margin;
 		}
 	});
 

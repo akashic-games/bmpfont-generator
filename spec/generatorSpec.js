@@ -49,14 +49,21 @@ describe("generator.draw", function() {
 				return g.glyph.yMin * scale;
 			}));
 			descend = Math.ceil(Math.abs(descend));
-
 			var g = font.charToGlyph("?");
 			var scale = 1 / g.font.unitsPerEm * 20;
 			glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
 			if (baseline < g.yMax * scale)
 				baseline = Math.ceil(g.yMax * scale);
-
-			var args = {quality: null, height: 20, width: 25, missingGlyph: "?", fill: "#000000", stroke: undefined, baseline: baseline};
+			var args = {
+				quality: null,
+				height: 20,
+				width: 25,
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: undefined,
+				baseline: baseline,
+				margin: 1
+			};
 			var resultJson = generator.draw(ctx, font, glyphList, descend, args);
 			expect(resultJson).toEqual(answerJson);
 			util.outputBitmapFont("result.png", canvas, args.quality, function() {
@@ -99,7 +106,16 @@ describe("generator.draw without width", function() {
 			if (baseline < g.yMax * scale)
 				baseline = Math.ceil(g.yMax * scale);
 
-			var args = {quality: null, height: 20, width: undefined, missingGlyph: "?", fill: "#000000", stroke: undefined, baseline: baseline};
+			var args = {
+				quality: null,
+				height: 20,
+				width: undefined,
+				 missingGlyph: "?",
+				 fill: "#000000",
+				 stroke: undefined,
+				 baseline: baseline,
+				margin: 1
+			};
 			var resultJson = generator.draw(ctx, font, glyphList, descend, args);
 			expect(resultJson).toEqual(answerJson);
 			util.outputBitmapFont("result.png", canvas, args.quality, function() {
@@ -113,7 +129,6 @@ describe("generator.draw without width", function() {
 	});
 });
 
-
 describe("generator.generateBitmapFont", function() {
 	it("normal scenario", function(done) {
 		var answerJson = require(path.resolve(__dirname, "fixtures/mplus.json")) ;
@@ -121,7 +136,19 @@ describe("generator.generateBitmapFont", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({"answer.png": answer});
-			var args = {quality: null, height: 20, width: 25, list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~", missingGlyph: "?", fill: "#000000", stroke: undefined, baseline: NaN, json: "result.json", noAntiAlias: false};
+			var args = {
+				quality: null,
+				height: 20,
+				width: 25,
+				list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~",
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: undefined,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBeNull();
 				var resultJsonStr = fs.readFileSync("result.json", "utf8");
@@ -142,7 +169,19 @@ describe("generator.generateBitmapFont", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({"answer.png": answer});
-			var args = {quality: null, height: 20, width: 25, list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~", missingGlyph: "?", fill: "#000000", stroke: undefined, baseline: NaN, json: "result.json", noAntiAlias: true};
+			var args = {
+				quality: null,
+				height: 20,
+				width: 25,
+				list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~",
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: undefined,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: true,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBeNull();
 				var resultJsonStr = fs.readFileSync("result.json", "utf8");
@@ -163,7 +202,19 @@ describe("generator.generateBitmapFont", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({"answer.png": answer});
-			var args = {quality: null, height: 20, width: 25, list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~", missingGlyph: "?", fill: "#0000ff", stroke: undefined, baseline: NaN, json: "result.json", noAntiAlias: false};
+			var args = {
+				quality: null,
+				height: 20,
+				width: 25,
+				list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~",
+				missingGlyph: "?",
+				fill: "#0000ff",
+				stroke: undefined,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBeNull();
 				var resultJsonStr = fs.readFileSync("result.json", "utf8");
@@ -184,7 +235,19 @@ describe("generator.generateBitmapFont", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({"answer.png": answer});
-			var args = {quality: null, height: 80, width: 80, list: "0123456789", missingGlyph: "?", fill: "#000000", stroke: "#0000ff", baseline: NaN, json: "result.json", noAntiAlias: false};
+			var args = {
+				quality: null,
+				height: 80,
+				width: 80,
+				list: "0123456789",
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: "#0000ff",
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBeNull();
 				var resultJsonStr = fs.readFileSync("result.json", "utf8");
@@ -203,7 +266,19 @@ describe("generator.generateBitmapFont", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({});
-			var args = {quality: null, height: 1000, width: 1000, list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~", missingGlyph: "?", fill: "#000000", stroke: undefined, baseline: NaN, json: "result.json", noAntiAlias: false};
+			var args = {
+				quality: null,
+				height: 1000,
+				width: 1000,
+				list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~",
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: undefined,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBe("list is too long");
 				mockfs.restore();
@@ -216,7 +291,19 @@ describe("generator.generateBitmapFont", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({});
-			var args = {quality: null, height: 0, width: 0, list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~", missingGlyph: "?", fill: "#000000", stroke: undefined, baseline: NaN, json: "result.json", noAntiAlias: false};
+			var args = {
+				quality: null,
+				height: 0,
+				width: 0,
+				list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~",
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: undefined,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBe("char size is too small");
 				mockfs.restore();
@@ -233,7 +320,19 @@ describe("generator.generateBitmapFont without width", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({"answer.png": answer});
-			var args = {quality: null, height: 20, width: undefined, list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~", missingGlyph: "?", fill: "#000000", stroke: undefined, baseline: NaN, json: "result.json", noAntiAlias: false};
+			var args = {
+				quality: null,
+				height: 20,
+				width: undefined,
+				list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~",
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: undefined,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBeNull();
 				var resultJsonStr = fs.readFileSync("result.json", "utf8");
@@ -258,13 +357,23 @@ describe("generator.generateBitmapFont defaultMissingGlyph", function() {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();
 			mockfs({"answer.png": answer});
-			var args = {quality: null, height: 20, width: undefined, list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~", missingGlyph: undefined, fill: "#000000", stroke: undefined, baseline: NaN, json: "result.json", noAntiAlias: false};
+			var args = {
+				quality: null,
+				height: 20,
+				width: undefined,
+				list: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~",
+				missingGlyph: undefined,
+				fill: "#000000",
+				stroke: undefined,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
 			generator.generateBitmapFont(font, "result.png", args, function(err) {
 				expect(err).toBeNull();
 				var resultJsonStr = fs.readFileSync("result.json", "utf8");
 				var resultJson = JSON.parse(resultJsonStr);
-				delete resultJson.width;
-				delete resultJson.height;
 				expect(resultJson).toEqual(answerJson);
 				diff("answer.png", "result.png", function(result) {
 					expect(result).toBe("Passed");
