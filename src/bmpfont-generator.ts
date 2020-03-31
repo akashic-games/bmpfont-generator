@@ -69,7 +69,7 @@ export function run(argv: string[]): void {
 		baseine: commander["baseline"],
 		quality: commander["quality"],
 		noAntiAlias: !commander["antiAlias"],
-		json: commander["json"] ?? path.parse(commander.args[1]).name + "_glyph.json",
+		json: commander["json"] ?? path.join(path.dirname(commander.args[1]), path.parse(commander.args[1]).name + "_glyphs.json"),
 		margin: commander["margin"]
 	});
 }
