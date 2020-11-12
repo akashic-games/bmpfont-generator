@@ -13,6 +13,7 @@ export interface CLIArgs {
 	json: string;
 	fill: string;
 	stroke: string;
+	strokeWidth: number;
 	quality: number;
 	margin: number;
 }
@@ -129,6 +130,7 @@ export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], des
 			var path = g.glyph.getPath(drawX + (drawWidth / 2) - (g.width / 2), drawY + cliArgs.baseline, cliArgs.height);
 			path.fill = cliArgs.fill;
 			path.stroke = cliArgs.stroke;
+			path.strokeWidth = cliArgs.strokeWidth;
 			path.draw(ctx);
 			if (index === glyphList.length - 1) {
 				mg = {x: drawX, y: drawY, width: drawWidth, height: drawHeight};

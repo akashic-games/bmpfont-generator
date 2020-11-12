@@ -262,6 +262,41 @@ describe("generator.generateBitmapFont", function() {
 		});
 	});
 
+	it("normal scenario with stroke and strokeWidth", function (done) {
+		var answerJson = require(path.resolve(__dirname, "fixtures/mplus-stroke-blue.json"));
+		var answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-stroke-width.png"));
+		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function (err, font) {
+			expect(err).toBeNull();
+			mockfs({ "answer.png": answer });
+			var args = {
+				quality: null,
+				height: 80,
+				width: 80,
+				list: "0123456789",
+				missingGlyph: "?",
+				fill: "#000000",
+				stroke: "#0000ff",
+				strokeWidth: 2,
+				baseline: NaN,
+				json: "result.json",
+				noAntiAlias: false,
+				margin: 1
+			};
+			generator.generateBitmapFont(font, "./hoge.png", args, function (err) {});
+			generator.generateBitmapFont(font, "result.png", args, function (err) {
+				expect(err).toBeNull();
+				var resultJsonStr = fs.readFileSync("result.json", "utf8");
+				var resultJson = JSON.parse(resultJsonStr);
+				expect(resultJson).toEqual(answerJson);
+				diff("answer.png", "result.png", function (result) {
+					expect(result).toBe("Passed");
+					mockfs.restore();
+					done();
+				});
+			});
+		});
+	});
+
 	it("too big error scenario", function(done) {
 		opentype.load(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"), function(err, font) {
 			expect(err).toBeNull();

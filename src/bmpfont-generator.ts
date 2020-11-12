@@ -17,6 +17,7 @@ interface CommandParameterObject {
 	missingGlyphImage?: string;
 	fill?: string;
 	stroke?: string;
+	strokeWidth?: number;
 	baseine?: number;
 	quality?: number;
 	noAntiAlias?: boolean;
@@ -43,6 +44,7 @@ export function run(argv: string[]): void {
 		.option("-F, --fill <fillstyle>", "フィルスタイル", "#000000")
 		.option("-S, --stroke <strokestyle>", "ストロークスタイル")
 		.option("-Q, --quality <quality>", "画質 1以上100以下", Number, null)
+		.option("--stroke-width <strokeWidth>", "ストロークスタイルを設定した時の線の太さを指定", Number, 1)
 		.option("--baseline <baseline>", "baselineの数値(px)", Number)
 		.option("--no-anti-alias", "アンチエイリアスを無効化する")
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
@@ -66,6 +68,7 @@ export function run(argv: string[]): void {
 		missingGlyphImage: commander["missingGlyphImage"],
 		fill: commander["fill"],
 		stroke: commander["stroke"],
+		strokeWidth: commander["strokeWidth"],
 		baseine: commander["baseline"],
 		quality: commander["quality"],
 		noAntiAlias: !commander["antiAlias"],
@@ -111,6 +114,7 @@ function cli(param: CommandParameterObject): void {
 				json: param.json ? param.json : undefined,
 				fill: param.fill,
 				stroke: param.stroke,
+				strokeWidth: param.strokeWidth,
 				quality: param.quality,
 				margin: param.margin
 			};
