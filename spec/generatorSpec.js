@@ -282,7 +282,6 @@ describe("generator.generateBitmapFont", function() {
 				noAntiAlias: false,
 				margin: 1
 			};
-			generator.generateBitmapFont(font, "./hoge.png", args, function (err) {});
 			generator.generateBitmapFont(font, "result.png", args, function (err) {
 				expect(err).toBeNull();
 				var resultJsonStr = fs.readFileSync("result.json", "utf8");
