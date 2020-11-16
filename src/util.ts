@@ -37,7 +37,7 @@ export function canGoIn(canvasSize: {width: number; height: number},
 	var drawY = margin;
 
 	glyphList.forEach((g: Glyph) => {
-		if (drawX + g.width > canvasSize.width) {
+		if (drawX + g.width + margin >= canvasSize.width) {
 			drawX = margin;
 			drawY += charHeight + margin;
 		}
