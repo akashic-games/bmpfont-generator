@@ -40,6 +40,7 @@ $ bmpfont-generator --help
 |  `--missing-glyph-image <filepath>` |  `-M`  | 代替文字として用いる画像ファイルのパス          |      |                  |
 |  `--fill <fillstyle>`               |  `-F`  | フィルスタイル                                |      | `#000000`        |
 |  `--stroke <strokestyle>`           |  `-S`  | ストロークスタイル                            |      | `#000000`        |
+|  `--stroke-width <strokewidth>`     |        | ストロークの太さ(px)                          |      | 1                |
 |  `--quality <quality>`              |  `-Q`  | 1-100の画質。指定する場合、 `pngquant` が必要  |      | 圧縮しない       |
 |  `--baseline <baseline>`            |        | ベースライン                                 |      | 自動で計算された値 |
 |  `--no-anti-alias`                  |        | アンチエイリアス無効化                        |      |                  |
