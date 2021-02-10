@@ -9,7 +9,7 @@
     "build": "tsc -p .",
     "test": "npm run build && jest && npm run lint",
     "lint": "npm run lint:ts && npm run lint:md",
-    "lint:ts": "eslint -c .eslintrc src/**/*.ts --fix",
+    "lint:ts": "eslint src/**/*.ts --fix",
     "lint:md": "remark ./*.md --frail --no-stdout --quiet --rc-path ./.remarkrc"
   },
   "bin": {
