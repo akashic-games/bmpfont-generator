@@ -1,7 +1,7 @@
-import fs = require("fs");
-import Canvas = require("canvas");
-import opentype = require("opentype.js");
-import util = require("./util");
+import * as fs from "fs";
+import * as Canvas from "canvas";
+import * as opentype from "opentype.js";
+import * as util from "./util";
 
 export interface CLIArgs {
 	list: string;

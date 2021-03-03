@@ -1,6 +1,6 @@
-import fs = require("fs");
-import opentype = require("opentype.js");
-import PngQuant = require("pngquant");
+import * as fs from "fs";
+import * as opentype from "opentype.js";
+import {quant as PngQuant} from "pngquant";
 
 // canvas.heightを値の倍数にする
 const MULTIPLE_OF_CANVAS_HEIGHT = 4;

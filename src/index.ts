@@ -1,2 +1,1 @@
-import generator = require("./generator");
-export = generator;
+export * as generator from "./generator";
