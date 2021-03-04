@@ -24,7 +24,7 @@ interface CommandParameterObject {
 	margin?: number;
 }
 
-export function run(_argv: string[]): void {
+export function run(argv: string[]): void {
 	const ver = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "package.json"), "utf8")).version;
 
 	commander
@@ -49,7 +49,7 @@ export function run(_argv: string[]): void {
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
 		.option("--no-json", "jsonファイルを出力しない")
 		.option("--margin <margin>", "文字間の余白(px)", Number, 1)
-		.parse(process.argv);
+		.parse(argv);
 
 	if (commander.args.length < 2) {
 		console.error("invalid arguments");
