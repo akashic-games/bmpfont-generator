@@ -1,6 +1,6 @@
-import opentype = require("opentype.js");
-import fs = require("fs");
-import PngQuant = require("pngquant");
+import * as fs from "fs";
+import * as opentype from "opentype.js";
+import {quant as PngQuant} from "pngquant";
 
 // canvas.heightを値の倍数にする
 const MULTIPLE_OF_CANVAS_HEIGHT = 4;
@@ -29,10 +29,12 @@ export function calculateCanvasSize(text: string, charWidth: number, charHeight:
 	return {width: canvasWidth, height: canvasHeight};
 }
 
-export function canGoIn(canvasSize: {width: number; height: number},
-                        glyphList: Glyph[],
-                        charHeight: number,
-                        margin: number): boolean {
+export function canGoIn(
+	canvasSize: {width: number; height: number},
+	glyphList: Glyph[],
+	charHeight: number,
+	margin: number
+): boolean {
 	var drawX = margin;
 	var drawY = margin;
 
@@ -46,11 +48,13 @@ export function canGoIn(canvasSize: {width: number; height: number},
 	return drawY + charHeight < canvasSize.height;
 }
 
-export function calculateCanvasSizeProportional(text: string,
-                                                glyphList: Glyph[],
-                                                height: number,
-                                                charHeight: number,
-                                                margin: number ): {width: number; height: number} {
+export function calculateCanvasSizeProportional(
+	text: string,
+	glyphList: Glyph[],
+	height: number,
+	charHeight: number,
+	margin: number
+): {width: number; height: number} {
 	var widthAverage = 0;
 	var widthMax = 0;
 	glyphList.forEach((g: Glyph) => {

@@ -1,10 +1,9 @@
-import generator = require("./generator");
-import commander = require("commander");
-import fs = require("fs");
-import path = require("path");
-import opentype = require("opentype.js");
-import Canvas = require("canvas");
-var Image = Canvas.Image;
+import * as fs from "fs";
+import * as path from "path";
+import * as Canvas from "canvas";
+import * as commander from "commander";
+import * as opentype from "opentype.js";
+import * as generator from "./generator";
 
 interface CommandParameterObject {
 	source?: string;
@@ -37,7 +36,7 @@ export function run(argv: string[]): void {
 		.option("-H, --height <size>", "文字の縦サイズ(px)", Number, 13)
 		.option("-w, --fixed-width <size>", "文字の横サイズ(px)。指定した場合、文字の幅に関わらずsizeを幅の値とする", Number)
 		.option("-c, --chars <string>", "書き出す文字の羅列",
-				"0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~")
+			"0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~")
 		.option("-f, --chars-file <filepath>", "書き出す文字が羅列されたテキストファイルのパス")
 		.option("-m, --missing-glyph <char>", "--charsの指定に含まれない文字の代わりに用いる代替文字")
 		.option("-M, --missing-glyph-image <filepath>", "--charsの指定に含まれない文字の代わりに用いる画像ファイルのパス")
@@ -50,7 +49,7 @@ export function run(argv: string[]): void {
 		.option("--json <filepath>", "jsonファイルを書き出すパス")
 		.option("--no-json", "jsonファイルを出力しない")
 		.option("--margin <margin>", "文字間の余白(px)", Number, 1)
-		.parse(process.argv);
+		.parse(argv);
 
 	if (commander.args.length < 2) {
 		console.error("invalid arguments");
@@ -60,20 +59,20 @@ export function run(argv: string[]): void {
 	cli({
 		source: commander.args[0],
 		output: commander.args[1],
-		fixedWidth: commander["fixedWidth"],
-		height: commander["height"],
-		chars: commander["chars"],
-		charsFile: commander["charsFile"],
-		missingGlyph: commander["missingGlyph"],
-		missingGlyphImage: commander["missingGlyphImage"],
-		fill: commander["fill"],
-		stroke: commander["stroke"],
-		strokeWidth: commander["strokeWidth"],
-		baseine: commander["baseline"],
-		quality: commander["quality"],
-		noAntiAlias: !commander["antiAlias"],
-		json: commander["json"] ?? path.join(path.dirname(commander.args[1]), path.parse(commander.args[1]).name + "_glyphs.json"),
-		margin: commander["margin"]
+		fixedWidth: commander.fixedWidth,
+		height: commander.height,
+		chars: commander.chars,
+		charsFile: commander.charsFile,
+		missingGlyph: commander.missingGlyph,
+		missingGlyphImage: commander.missingGlyphImage,
+		fill: commander.fill,
+		stroke: commander.stroke,
+		strokeWidth: commander.strokeWidth,
+		baseine: commander.baseline,
+		quality: commander.quality,
+		noAntiAlias: !commander.antiAlias,
+		json: commander.json ?? path.join(path.dirname(commander.args[1]), path.parse(commander.args[1]).name + "_glyphs.json"),
+		margin: commander.margin
 	});
 }
 
@@ -95,7 +94,7 @@ function cli(param: CommandParameterObject): void {
 
 	if (param.missingGlyphImage) {
 		existCheck(param.missingGlyphImage);
-		param.missingGlyph = new Image;
+		param.missingGlyph = new Canvas.Image;
 		param.missingGlyph.src = fs.readFileSync(param.missingGlyphImage);
 	}
 

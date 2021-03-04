@@ -1,7 +1,7 @@
-import util = require("./util");
-import fs = require("fs");
-import opentype = require("opentype.js");
-import Canvas = require("canvas");
+import * as fs from "fs";
+import * as Canvas from "canvas";
+import * as opentype from "opentype.js";
+import * as util from "./util";
 
 export interface CLIArgs {
 	list: string;
@@ -60,7 +60,13 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	// 必要なcanvasのサイズを算出する
 	var canvasSize: {width: number; height: number} = undefined;
 	if (cliArgs.width === undefined) {
-		canvasSize = util.calculateCanvasSizeProportional(cliArgs.list, glyphList, adjustedHeight, cliArgs.baseline + descend, cliArgs.margin);
+		canvasSize = util.calculateCanvasSizeProportional(
+			cliArgs.list,
+			glyphList,
+			adjustedHeight,
+			cliArgs.baseline + descend,
+			cliArgs.margin
+		);
 	} else {
 		canvasSize = util.calculateCanvasSize(cliArgs.list, cliArgs.width, adjustedHeight, cliArgs.margin);
 	}
@@ -101,16 +107,16 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 	util.outputBitmapFont(outputPath, canvas, cliArgs.quality, callback);
 }
 
-export function draw(ctx: any, font: opentype.Font, glyphList: util.Glyph[], descend: number, cliArgs: CLIArgs): {
+export function draw(ctx: any, _font: opentype.Font, glyphList: util.Glyph[], descend: number, cliArgs: CLIArgs): {
 	map: {[key: number]: {x: number; y: number}};
-	missingGlyph: {x: number; y: number; width: number; height: number; }
+	missingGlyph: {x: number; y: number; width: number; height: number };
 } {
-	var dict: {[key: number]: {x: number; y: number, width?: number, height?: number}} = {};
+	var dict: {[key: number]: {x: number; y: number; width?: number; height?: number}} = {};
 
 	var drawX = cliArgs.margin;
 	var drawY = cliArgs.margin;
 	var drawHeight = cliArgs.baseline + descend;
-	var mg: {x: number; y: number; width: number; height: number; } = undefined;
+	var mg: {x: number; y: number; width: number; height: number } = undefined;
 
 	glyphList.forEach((g: util.Glyph, index: number) => {
 		if (g.glyph === undefined) {
