@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import * as opentype from "opentype.js";
+import type * as opentype from "opentype.js";
 import {quant as PngQuant} from "pngquant";
 
 // canvas.heightを値の倍数にする
@@ -15,16 +15,16 @@ export function calculateCanvasSize(text: string, charWidth: number, charHeight:
 		return {width: -1, height: -1};
 	}
 	// +1しているのはmissing glyph用
-	var textSize = text.split("").length + 1;
-	var canvasSquareSideSize = 1;
+	const textSize = text.split("").length + 1;
+	let canvasSquareSideSize = 1;
 
 	const advanceWidth = charWidth + margin;
 	const advanceHeight = charHeight + margin;
 	// 文字が入りきる正方形の辺の長さを求める
 	for (; (canvasSquareSideSize / advanceWidth) * (canvasSquareSideSize / advanceHeight) < textSize; canvasSquareSideSize *= 2);
-	var canvasWidth = canvasSquareSideSize;
+	const canvasWidth = canvasSquareSideSize;
 	// 正方形じゃない場合があるのでcanvasSquareSideSizeは使えない
-	var tmpCanvasHeight = Math.ceil(textSize / Math.floor(canvasWidth / advanceWidth)) * advanceHeight;
+	const tmpCanvasHeight = Math.ceil(textSize / Math.floor(canvasWidth / advanceWidth)) * advanceHeight;
 	const canvasHeight = Math.ceil(tmpCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 	return {width: canvasWidth, height: canvasHeight};
 }
@@ -35,8 +35,8 @@ export function canGoIn(
 	charHeight: number,
 	margin: number
 ): boolean {
-	var drawX = margin;
-	var drawY = margin;
+	let drawX = margin;
+	let drawY = margin;
 
 	glyphList.forEach((g: Glyph) => {
 		if (drawX + g.width + margin >= canvasSize.width) {
@@ -55,8 +55,8 @@ export function calculateCanvasSizeProportional(
 	charHeight: number,
 	margin: number
 ): {width: number; height: number} {
-	var widthAverage = 0;
-	var widthMax = 0;
+	let widthAverage = 0;
+	let widthMax = 0;
 	glyphList.forEach((g: Glyph) => {
 		if (g.width > widthMax)
 			widthMax = g.width + margin;
@@ -68,7 +68,7 @@ export function calculateCanvasSizeProportional(
 		return {width: -1, height: -1};
 	}
 	// 平均値を利用して目安となるサイズを計算
-	var canvasSize = calculateCanvasSize(text, widthAverage, height, margin);
+	const canvasSize = calculateCanvasSize(text, widthAverage, height, margin);
 	// 文字が入りきるまで縦幅を増やす
 	while (!canGoIn(canvasSize, glyphList, charHeight, margin)) {
 		canvasSize.height += MULTIPLE_OF_CANVAS_HEIGHT;
@@ -85,8 +85,8 @@ export function outputBitmapFont(outputPath: string, canvas: any, quality: numbe
 			}
 		});
 	} else {
-		var pngQuanter = new PngQuant(["--quality=" + quality, 256]);
-		var chunks: Buffer[] = [];
+		const pngQuanter = new PngQuant(["--quality=" + quality, 256]);
+		const chunks: Buffer[] = [];
 		pngQuanter
 			.on("data", (chunk: Buffer) => {
 				chunks.push(chunk);
@@ -110,22 +110,22 @@ export function createJson(map: any, missingGlyph: {x: number; y: number}, width
 
 export function getMaxBaseline(glyphList: Glyph[], height: number): number {
 	return Math.ceil(Math.max.apply(Math, glyphList.map((g: Glyph) => {
-		var scale = 1 / g.glyph.font.unitsPerEm * height;
+		const scale = 1 / g.glyph.font.unitsPerEm * height;
 		return g.glyph.yMax * scale;
 	})));
 }
 
 export function getMinDescend(glyphList: Glyph[], height: number): number {
-	var descend = Math.min.apply(Math, glyphList.map((g: Glyph) => {
-		var scale = 1 / g.glyph.font.unitsPerEm * height;
+	const descend = Math.min.apply(Math, glyphList.map((g: Glyph) => {
+		const scale = 1 / g.glyph.font.unitsPerEm * height;
 		return g.glyph.yMin * scale;
 	}));
 	return Math.ceil(Math.abs(descend));
 }
 
 export function getAdjustedHeight(descend: number, height: number, baseline: number): number {
-	var extraDescend = Math.ceil(descend - (height - baseline));
-	var adjustedHeight = height;
+	const extraDescend = Math.ceil(descend - (height - baseline));
+	let adjustedHeight = height;
 	if (extraDescend > 0) {
 		adjustedHeight += extraDescend;
 	}
