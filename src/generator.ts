@@ -25,29 +25,29 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 		var glyph = font.stringToGlyphs(char);
 		glyph.forEach((g) => {
 			if (g.unicodes.length === 0) lostChars.push(char);
-			var scale = 1 / g.font.unitsPerEm * cliArgs.height;
+			var scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * cliArgs.height;
 			glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
 		});
 	});
 
 	if (isNaN(cliArgs.baseline)) {
-		cliArgs.baseline = util.getMaxBaseline(glyphList, cliArgs.height);
+		cliArgs.baseline = util.getMaxBaseline(glyphList, cliArgs.height, font.unitsPerEm);
 	}
 
 	if (isNaN(cliArgs.margin)) cliArgs.margin = 1;
 
 	// missingGlyphをglyphListに追加しつつ、ベースライン値を更新
 	if (cliArgs.missingGlyph === undefined || typeof cliArgs.missingGlyph === "string") {
-		var g = font.glyphs[0];
+		var g = font.glyphs.get(0);
 		if (cliArgs.missingGlyph)
 			g = font.charToGlyph(cliArgs.missingGlyph);
-		var scale = 1 / g.font.unitsPerEm * cliArgs.height;
+		var scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * cliArgs.height;
 		glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
 		if (cliArgs.baseline < g.yMax * scale)
 			cliArgs.baseline = Math.ceil(g.yMax * scale);
 	}
 
-	var descend = util.getMinDescend(glyphList, cliArgs.height + cliArgs.margin );
+	var descend = util.getMinDescend(glyphList, cliArgs.height + cliArgs.margin, font.unitsPerEm);
 	var adjustedHeight = util.getAdjustedHeight(descend, cliArgs.height + cliArgs.margin, cliArgs.baseline);
 
 	// missingGlyphが画像の場合の処理

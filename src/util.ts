@@ -108,17 +108,19 @@ export function createJson(map: any, missingGlyph: {x: number; y: number}, width
 	return JSON.stringify({map: map, missingGlyph: missingGlyph, width: width, height: height});
 }
 
-export function getMaxBaseline(glyphList: Glyph[], height: number): number {
+export function getMaxBaseline(glyphList: Glyph[], height: number, defaultUnitsPerEm: number): number {
 	return Math.ceil(Math.max.apply(Math, glyphList.map((g: Glyph) => {
-		var scale = 1 / g.glyph.font.unitsPerEm * height;
-		return g.glyph.yMax * scale;
+		var scale = 1 / (g.glyph.path.unitsPerEm ?? defaultUnitsPerEm) * height;
+		var metrics = g.glyph.getMetrics();
+		return metrics.yMax * scale;
 	})));
 }
 
-export function getMinDescend(glyphList: Glyph[], height: number): number {
+export function getMinDescend(glyphList: Glyph[], height: number, defaultUnitsPerEm: number): number {
 	var descend = Math.min.apply(Math, glyphList.map((g: Glyph) => {
-		var scale = 1 / g.glyph.font.unitsPerEm * height;
-		return g.glyph.yMin * scale;
+		var scale = 1 / (g.glyph.path.unitsPerEm ?? defaultUnitsPerEm) * height;
+		var metrics = g.glyph.getMetrics();
+		return metrics.yMin * scale;
 	}));
 	return Math.ceil(Math.abs(descend));
 }
