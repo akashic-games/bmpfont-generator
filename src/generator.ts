@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as Canvas from "canvas";
-import * as opentype from "opentype.js";
+import type * as opentype from "opentype.js";
 import * as util from "./util";
 
 export interface CLIArgs {
@@ -19,13 +19,13 @@ export interface CLIArgs {
 }
 
 export function generateBitmapFont(font: opentype.Font, outputPath: string, cliArgs: CLIArgs, callback: (err: any) => void): void {
-	var lostChars: string[] = [];
-	var glyphList: util.Glyph[] = [];
+	const lostChars: string[] = [];
+	const glyphList: util.Glyph[] = [];
 	Array.from(cliArgs.list).forEach((char: string) => {
-		var glyph = font.stringToGlyphs(char);
+		const glyph = font.stringToGlyphs(char);
 		glyph.forEach((g) => {
 			if (g.unicodes.length === 0) lostChars.push(char);
-			var scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * cliArgs.height;
+			const scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * cliArgs.height;
 			glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
 		});
 	});
@@ -38,27 +38,27 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 
 	// missingGlyphをglyphListに追加しつつ、ベースライン値を更新
 	if (cliArgs.missingGlyph === undefined || typeof cliArgs.missingGlyph === "string") {
-		var g = font.glyphs.get(0);
+		let g = font.glyphs.get(0);
 		if (cliArgs.missingGlyph)
 			g = font.charToGlyph(cliArgs.missingGlyph);
-		var scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * cliArgs.height;
+		const scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * cliArgs.height;
 		glyphList.push({glyph: g, width: Math.ceil(g.advanceWidth * scale)});
 		if (cliArgs.baseline < g.yMax * scale)
 			cliArgs.baseline = Math.ceil(g.yMax * scale);
 	}
 
-	var descend = util.getMinDescend(glyphList, cliArgs.height + cliArgs.margin, font.unitsPerEm);
-	var adjustedHeight = util.getAdjustedHeight(descend, cliArgs.height + cliArgs.margin, cliArgs.baseline);
+	const descend = util.getMinDescend(glyphList, cliArgs.height + cliArgs.margin, font.unitsPerEm);
+	const adjustedHeight = util.getAdjustedHeight(descend, cliArgs.height + cliArgs.margin, cliArgs.baseline);
 
 	// missingGlyphが画像の場合の処理
 	if (typeof cliArgs.missingGlyph !== "string" && cliArgs.missingGlyph !== undefined) {
-		var mgScale = cliArgs.missingGlyph.width / cliArgs.missingGlyph.height;
-		var mgWidth = Math.ceil((cliArgs.baseline + descend) * mgScale);
+		const mgScale = cliArgs.missingGlyph.width / cliArgs.missingGlyph.height;
+		const mgWidth = Math.ceil((cliArgs.baseline + descend) * mgScale);
 		glyphList.push({glyph: undefined, width: mgWidth});
 	}
 
 	// 必要なcanvasのサイズを算出する
-	var canvasSize: {width: number; height: number} = undefined;
+	let canvasSize: {width: number; height: number} = undefined;
 	if (cliArgs.width === undefined) {
 		canvasSize = util.calculateCanvasSizeProportional(
 			cliArgs.list,
@@ -81,14 +81,14 @@ export function generateBitmapFont(font: opentype.Font, outputPath: string, cliA
 		return;
 	}
 
-	var canvas = Canvas.createCanvas(canvasSize.width, canvasSize.height);
-	var ctx = canvas.getContext("2d");
+	const canvas = Canvas.createCanvas(canvasSize.width, canvasSize.height);
+	const ctx = canvas.getContext("2d");
 
 	if (cliArgs.noAntiAlias)
 		ctx.antialias = "none";
 
 	// 描画
-	var drawResult = draw(ctx, font, glyphList, descend, cliArgs);
+	const drawResult = draw(ctx, font, glyphList, descend, cliArgs);
 
 	// 各ファイルの出力
 	if (cliArgs.json) {
@@ -111,12 +111,12 @@ export function draw(ctx: any, _font: opentype.Font, glyphList: util.Glyph[], de
 	map: {[key: number]: {x: number; y: number}};
 	missingGlyph: {x: number; y: number; width: number; height: number };
 } {
-	var dict: {[key: number]: {x: number; y: number; width?: number; height?: number}} = {};
+	const dict: {[key: number]: {x: number; y: number; width?: number; height?: number}} = {};
 
-	var drawX = cliArgs.margin;
-	var drawY = cliArgs.margin;
-	var drawHeight = cliArgs.baseline + descend;
-	var mg: {x: number; y: number; width: number; height: number } = undefined;
+	let drawX = cliArgs.margin;
+	let drawY = cliArgs.margin;
+	const drawHeight = cliArgs.baseline + descend;
+	let mg: {x: number; y: number; width: number; height: number } = undefined;
 
 	glyphList.forEach((g: util.Glyph, index: number) => {
 		if (g.glyph === undefined) {
@@ -125,7 +125,7 @@ export function draw(ctx: any, _font: opentype.Font, glyphList: util.Glyph[], de
 			ctx.drawImage(cliArgs.missingGlyph, drawX, drawY, g.width, drawHeight);
 			mg = {x: drawX, y: drawY, width: g.width, height: drawHeight};
 		} else {
-			var drawWidth = cliArgs.width;
+			let drawWidth = cliArgs.width;
 			if (drawWidth === undefined) {
 				drawWidth = g.width + cliArgs.margin;
 			}
@@ -133,7 +133,7 @@ export function draw(ctx: any, _font: opentype.Font, glyphList: util.Glyph[], de
 				drawX = cliArgs.margin;
 				drawY += drawHeight + cliArgs.margin;
 			}
-			var path = g.glyph.getPath(drawX + (drawWidth / 2) - (g.width / 2), drawY + cliArgs.baseline, cliArgs.height);
+			const path = g.glyph.getPath(drawX + (drawWidth / 2) - (g.width / 2), drawY + cliArgs.baseline, cliArgs.height);
 			path.fill = cliArgs.fill;
 			path.stroke = cliArgs.stroke;
 			path.strokeWidth = cliArgs.strokeWidth;
