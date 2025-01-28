@@ -8,7 +8,6 @@
     "outDir": "./lib"
   },
   "files": [
-    "./typings/opentype.js.d.ts",
     "./node_modules/canvas/types/index.d.ts",
     "./typings/pngquant.d.ts",
     "./src/bmpfont-generator.ts",
