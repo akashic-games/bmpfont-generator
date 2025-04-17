@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require("../lib/bmpfont-generator.js").run(process.argv);
+require("../lib/cli.js").run(process.argv);
