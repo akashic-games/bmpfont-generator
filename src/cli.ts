@@ -35,7 +35,6 @@ async function app(param: BmpfontGeneratorCliConfig) {
 
     const { canvas, map, missingGlyph, lostChars, resolvedSizeOption } = await generateBitmap(chars, fontOptions, sizeOptions);
 
-    // NOTE: resolvedSizeOption.widthはundefinedケースが古いコードにもあるが問題ないか？
     if (param.json) {
         fs.writeFileSync(
             param.json,

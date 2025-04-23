@@ -70,8 +70,8 @@ export interface ResolvedSizeOption extends SizeOptions {
 	/**
 	 * 行の高さ。ビットマップを並べる際の1行辺りの高さ。
 	 * requiredHeightとSizeOptions#heightの大きいほうを採用する。
-	 * この値にmarginを加えると次の行の上端への距離(advanceHeight)になる 
-	 * 旧adjustedHeight相当？
+	 * この値にmarginを加えると次の行の上端への距離(advanceHeight)になる。
+	 * 旧adjustedHeight相当。
 	 */
 	lineHeight: number;
 }

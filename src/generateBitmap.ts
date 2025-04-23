@@ -64,7 +64,7 @@ function draw(ctx: canvas.CanvasRenderingContext2D, glyphList: Glyph[], resolved
             path.strokeWidth = fontOptions.strokeWidth;
             path.draw(ctx as unknown as CanvasRenderingContext2D); // NOTE: oepntype.jsとcanvasのCanvasRenderingContext2Dが一致しないためunknownを経由する
 
-            //NOTE: missingGlyphが最後まで無い場合、最後の文字をmissingGlyphにしてよいかどうか
+            // NOTE: missingGlyphが最後まで無い場合、最後の文字をmissingGlyphにしてよいかどうか
             if (index === glyphList.length - 1 && !missingGlyph) {
                 missingGlyph = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
             } else {

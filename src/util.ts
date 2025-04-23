@@ -56,7 +56,7 @@ export function calculateResolvedSizeOption(glyphList: CharGlyph[], sizeOptions:
 	const lineHeight = Math.max(requiredHeight, sizeOptions.height);
 	return {
 		...sizeOptions,
-        baselineHeight,
+		baselineHeight,
 		requiredHeight,
 		lineHeight,
 	} as ResolvedSizeOption;
@@ -74,15 +74,13 @@ export function calculateWidthAverage(glyphList: Glyph[], margin: number) {
 	let widthAverage = 0;
 	let widthMax = 0;
 	glyphList.forEach((g: Glyph) => {
-		if (g.width > widthMax)
-			widthMax = g.width + margin;
+		if (g.width > widthMax) widthMax = g.width + margin;
 		widthAverage += g.width  + margin;
 	});
 	widthAverage /= glyphList.length;
 	return widthAverage;
 }
 
-// ほぼコピペ
 export function calculateCanvasSize(glyphList: Glyph[], charWidth: number | undefined, lineHeight: number, margin: number): {width: number; height: number} {
     const width = charWidth ?? calculateWidthAverage(glyphList, margin);
 
@@ -103,12 +101,10 @@ export function calculateCanvasSize(glyphList: Glyph[], charWidth: number | unde
 	const tmpCanvasHeight = Math.ceil(glyphCount / Math.floor(canvasWidth / advanceWidth)) * advanceHeight;
 	const canvasHeight = Math.ceil(tmpCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 
-
     let height = canvasHeight;
     // widthAverageから導出した場合、サイズが不足する場合があるためGlyphを並べた際に必要なheightを導出する
-    if (!charWidth) {
-        height = requiredCanvasHeight(glyphList, canvasWidth, lineHeight, margin);
-    }
+    if (!charWidth) height = requiredCanvasHeight(glyphList, canvasWidth, lineHeight, margin);
+
 	return {width: canvasWidth, height};
 }
 
