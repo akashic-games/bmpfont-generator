@@ -73,7 +73,6 @@ function draw(ctx: canvas.SKRSContext2D, glyphList: Glyph[], resolvedSizeOption:
         }
         drawX += width + resolvedSizeOption.margin;
     });
-
     // NOTE: missingGlyphが末尾でない仕様が許されるか？
     return {map: dict, missingGlyph};
 }
