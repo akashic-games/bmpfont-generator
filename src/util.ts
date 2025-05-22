@@ -1,4 +1,4 @@
-import * as canvas from "canvas";
+import * as canvas from "@napi-rs/canvas";
 import * as opentype from "opentype.js";
 import type { SizeOptions, Glyph, ResolvedSizeOption, CharGlyph, ImageGlyph } from "./type";
 

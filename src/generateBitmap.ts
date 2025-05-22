@@ -1,4 +1,4 @@
-import * as canvas from "canvas";
+import * as canvas from "@napi-rs/canvas";
 import { FontRenderingOptions, SizeOptions, ResolvedSizeOption, Glyph, ImageGlyph, BitmapDictionaryEelement, BitmapDictionary } from "./type";
 import { calculateCanvasSize, calculateResolvedSizeOption, calculateWidthAverage, charsToGlyphList, updateGlyphListWithImage } from "./util";
 
@@ -25,9 +25,7 @@ export function generateBitmap(
 
     const canvasSize = calculateCanvasSize(glyphList, resolvedSizeOption.width, resolvedSizeOption.lineHeight, resolvedSizeOption.margin);
     const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
-	const ctx = cvs.getContext("2d");
-    if (fontOptions.antialias) ctx.antialias = "none";
-
+    const ctx = cvs.getContext("2d");
     const drawResult = draw(ctx, glyphList, resolvedSizeOption, fontOptions);
 
 	return Promise.resolve({
@@ -38,7 +36,7 @@ export function generateBitmap(
 	});
 }
 
-function draw(ctx: canvas.CanvasRenderingContext2D, glyphList: Glyph[], resolvedSizeOption: ResolvedSizeOption, fontOptions: FontRenderingOptions): {
+function draw(ctx: canvas.SKRSContext2D, glyphList: Glyph[], resolvedSizeOption: ResolvedSizeOption, fontOptions: FontRenderingOptions): {
     map: BitmapDictionary,
     missingGlyph: BitmapDictionaryEelement
 } {
@@ -75,6 +73,7 @@ function draw(ctx: canvas.CanvasRenderingContext2D, glyphList: Glyph[], resolved
         }
         drawX += width + resolvedSizeOption.margin;
     });
+
     // NOTE: missingGlyphが末尾でない仕様が許されるか？
     return {map: dict, missingGlyph};
 }

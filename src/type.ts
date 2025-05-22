@@ -1,4 +1,4 @@
-import type { Image } from "canvas";
+import * as canvas from "@napi-rs/canvas";
 
 export interface BmpfontGeneratorCliConfig {
 	source: string;
@@ -6,7 +6,7 @@ export interface BmpfontGeneratorCliConfig {
 	fixedWidth?: number;
 	height: number;
 	chars: string;
-	missingGlyph?: string | Image;
+	missingGlyph?: string | canvas.Image;
 	missingGlyphImage?: string;
 	fill: string;
 	stroke?: string;
@@ -85,7 +85,7 @@ export interface CharGlyph {
 
 export interface ImageGlyph {
     width: number;
-    image: Image;
+    image: canvas.Image;
 }
 
 export interface BitmapDictionary {

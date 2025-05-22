@@ -4,7 +4,7 @@ import { generateBitmap } from "./generateBitmap";
 import { parseArgs } from "node:util";
 import * as path from "path";
 import * as fs from "fs";
-import * as canvas from "canvas";
+import * as canvas from "@napi-rs/canvas";
 import {outputBitmapFont} from "./outputBitmapFont";
 
 export function run (argv: string[]): void {
