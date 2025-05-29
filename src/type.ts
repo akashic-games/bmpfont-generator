@@ -20,19 +20,19 @@ export interface BmpfontGeneratorCliConfig {
 
 
 export interface CalculateCanvasSizeOptions {
-	chars: string,
-	charWidth: number,
-	charHeight: number,
-	margin: number    
+	chars: string;
+	charWidth: number;
+	charHeight: number;
+	margin: number;
 }
 
 export interface FontRenderingOptions {
-	font: opentype.Font,
+	font: opentype.Font;
 	fillColor: string;
 	strokeColor?: string;
 	strokeWidth: number;
 	antialias: boolean;
-  }
+}
 
 export interface SizeOptions {
 
@@ -40,7 +40,7 @@ export interface SizeOptions {
 	 * ユーザが指定できる文字の横サイズ(px)
 	 * 指定した場合、グリフごとの幅に関わらずこの値を幅として扱う
 	 */
-	width?: number;
+	fixedWidth?: number;
 
 	/**
 	 * ユーザが指定できる文字の縦サイズ(px)。省略した場合、13。
@@ -59,9 +59,9 @@ export interface SizeOptions {
 	baselineHeight?: number;
 }
 
-export interface ResolvedSizeOption extends SizeOptions {
+export interface ResolvedSizeOptions extends SizeOptions {
 	baselineHeight: number;
-    /**
+	/**
 	 * フォントグリフを重ならず描画するために必要な高さ。
 	 * baseline(yMax) + desend(yMin)の絶対値の合計。
 	 */
@@ -79,23 +79,22 @@ export interface ResolvedSizeOption extends SizeOptions {
 export type Glyph = CharGlyph | ImageGlyph;
 
 export interface CharGlyph {
-    glyph: opentype.Glyph;
-    width: number;
+	glyph: opentype.Glyph;
+	width: number;
 }
 
 export interface ImageGlyph {
-    width: number;
-    image: Image;
+	width: number;
+	image: Image;
 }
 
-export interface BitmapDictionary {
-    [key: number]: BitmapDictionaryEelement;
+export interface GlyphLocationMap {
+	[key: number]: GlyphLocation;
 }
 
-export interface BitmapDictionaryEelement {
-    x: number;
-    y: number;
-    // 元が省略しうる定義のため後方互換を考慮してoptionalとしている
-    width?: number;
-    height?: number;
+export interface GlyphLocation {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
 }
