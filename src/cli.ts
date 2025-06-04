@@ -8,9 +8,9 @@ import PngQuant from "pngquant";
 import { generateBitmap } from "./generateBitmap";
 import type { BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
 
-export function run (argv: string[]): void {
+export async function run(argv: string[]): Promise<void> {
 	const config = parseArguments(argv);
-	app(config);
+	return app(config);
 }
 
 async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
@@ -34,7 +34,7 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	const chars: (string | canvas.Image)[] = param.chars.split("");
 	if (param.missingGlyph) chars.push(param.missingGlyph);
 
-	const { canvas, map, missingGlyph, resolvedSizeOption, lostChars } = await generateBitmap(chars, fontOptions, sizeOptions);
+	const { canvas, map, missingGlyph, resolvedSizeOptions, lostChars } = await generateBitmap(chars, fontOptions, sizeOptions);
 
 	if (lostChars.length > 0) {
 		console.log(
@@ -45,9 +45,13 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	}
 
 	if (param.json) {
-		fs.writeFileSync(
+		await writeFile(
 			param.json,
-			JSON.stringify({map: map, missingGlyph: missingGlyph, width: resolvedSizeOption.fixedWidth, height: resolvedSizeOption.lineHeight })
+			JSON.stringify({
+				map: map, missingGlyph: missingGlyph,
+				width: resolvedSizeOption.fixedWidth,
+				height: resolvedSizeOption.lineHeight
+			})
 		);
 	}
 
@@ -61,6 +65,7 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
 				if (error) return reject(error);
 				resolve(result);
 			});
+            return;
 		}
 
 		const pngQuanter: any = new PngQuant([`--quality=${quality}`, "256"]);
@@ -68,8 +73,8 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
 		pngQuanter
 			.on("data", (chunk: Buffer) => chunks.push(chunk))
 			.on("end", () => resolve(Buffer.concat(chunks)))
-			.on("error", () => reject("error at pngquant"));
-		await cvs.createPNGStream().pipe(pngQuanter);
+			.on("error", (e: Error) => reject(e ?? "error at pngquant"));
+		cvs.createPNGStream().pipe(pngQuanter);
 	});
 }
 

@@ -27,7 +27,11 @@ export function charsToGlyphList(
 }
 
 export function updateGlyphListWithImage(
-	charGlyphList: CharGlyph[], chars: (string | canvas.Image)[], unitsPerEm: number, resolvedSizeOption: ResolvedSizeOptions): Glyph[] {
+	charGlyphList: CharGlyph[],
+	chars: (string | canvas.Image)[],
+	unitsPerEm: number,
+	resolvedSizeOption: ResolvedSizeOptions
+): Glyph[] {
 	const descend = getMinDescend(charGlyphList, resolvedSizeOption.height + resolvedSizeOption.margin, unitsPerEm);
 	const glyphList: Glyph[] = charGlyphList;
 
@@ -71,20 +75,9 @@ function getMaxBaseline(glyphList: CharGlyph[], height: number, defaultUnitsPerE
 	})));
 }
 
-export function calculateWidthAverage(glyphList: Glyph[], margin: number): number {
-	let widthAverage = 0;
-	let widthMax = 0;
-	glyphList.forEach((g: Glyph) => {
-		if (g.width > widthMax) widthMax = g.width + margin;
-		widthAverage += g.width  + margin;
-	});
-	widthAverage /= glyphList.length;
-	return widthAverage;
-}
-
 export function calculateCanvasSize(
 	glyphList: Glyph[], charWidth: number | undefined, lineHeight: number, margin: number): {width: number; height: number} {
-	const width = charWidth ?? calculateWidthAverage(glyphList, margin);
+	const width = charWidth ?? glyphList.reduce((acc, g) => acc + g.width + margin, 0) / glyphList.length;
 
 	if (width <= 0 || lineHeight <= 0) return {width: -1, height: -1};
 

@@ -18,14 +18,6 @@ export interface BmpfontGeneratorCliConfig {
 	margin: number;
 }
 
-
-export interface CalculateCanvasSizeOptions {
-	chars: string;
-	charWidth: number;
-	charHeight: number;
-	margin: number;
-}
-
 export interface FontRenderingOptions {
 	font: opentype.Font;
 	fillColor: string;

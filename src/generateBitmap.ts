@@ -1,8 +1,19 @@
 import * as canvas from "canvas";
-import type { FontRenderingOptions, SizeOptions, ResolvedSizeOptions,
-	Glyph, ImageGlyph, GlyphLocation, GlyphLocationMap } from "./type";
-import { calculateCanvasSize, resolveSizeOptions,
-	charsToGlyphList, updateGlyphListWithImage } from "./util";
+import type {
+	FontRenderingOptions,
+	SizeOptions,
+	ResolvedSizeOptions,
+	Glyph,
+	ImageGlyph,
+	GlyphLocation,
+	GlyphLocationMap
+} from "./type";
+import {
+	calculateCanvasSize,
+	resolveSizeOptions,
+	charsToGlyphList,
+	updateGlyphListWithImage
+} from "./util";
 
 export function generateBitmap(
 	chars: (string | canvas.Image)[],
@@ -13,43 +24,51 @@ export function generateBitmap(
 		map: GlyphLocationMap;
 		missingGlyph: GlyphLocation;
 		lostChars: string[];
-		resolvedSizeOption: ResolvedSizeOptions;
+		resolvedSizeOptions: ResolvedSizeOptions;
 	}> {
 	const { charGlyphList, lostChars } = charsToGlyphList(chars, fontOptions.font, sizeOptions);
-	const resolvedSizeOption: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
+	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
 
 	let glyphList: Glyph[];
 	if (chars.some(charOrImage => typeof charOrImage !== "string")) {
-		glyphList = updateGlyphListWithImage(charGlyphList, chars, fontOptions.font.unitsPerEm, resolvedSizeOption);
+		glyphList = updateGlyphListWithImage(charGlyphList, chars, fontOptions.font.unitsPerEm, resolvedSizeOptions);
 	} else {
 		glyphList = charGlyphList;
 	}
 
-	const canvasSize = calculateCanvasSize(glyphList, resolvedSizeOption.fixedWidth, resolvedSizeOption.lineHeight, resolvedSizeOption.margin);
+	const canvasSize = calculateCanvasSize(
+		glyphList,
+		resolvedSizeOptions.fixedWidth,
+		resolvedSizeOptions.lineHeight,
+		resolvedSizeOptions.margin
+	);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
-	if (fontOptions.antialias) ctx.antialias = "none";
+	if (!fontOptions.antialias) ctx.antialias = "none";
 
-	const drawResult = draw(ctx, glyphList, resolvedSizeOption, fontOptions);
+	const drawResult = draw(ctx, glyphList, resolvedSizeOptions, fontOptions);
 
 	return Promise.resolve({
 		lostChars,
-		resolvedSizeOption,
+		resolvedSizeOptions,
 		canvas: cvs,
 		...drawResult
 	});
 }
 
 function draw(
-	ctx: canvas.CanvasRenderingContext2D, glyphList: Glyph[],
-	resolvedSizeOption: ResolvedSizeOptions, fontOptions: FontRenderingOptions): {
+	ctx: canvas.CanvasRenderingContext2D,
+	glyphList: Glyph[],
+	resolvedSizeOption: ResolvedSizeOptions,
+	fontOptions: FontRenderingOptions
+): {
 		map: GlyphLocationMap;
 		missingGlyph: GlyphLocation;
 	} {
 	let drawX = resolvedSizeOption.margin;
 	let drawY = resolvedSizeOption.margin;
 	let missingGlyph!: GlyphLocation;
-	const dict: GlyphLocationMap = {};
+	const map: GlyphLocationMap = {};
 
 	glyphList.forEach((glyph: Glyph, index: number) => {
 		const width = resolvedSizeOption.fixedWidth ?? glyph.width + resolvedSizeOption.margin;
@@ -75,14 +94,14 @@ function draw(
 				missingGlyph = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 			} else {
 				glyph.glyph.unicodes.forEach(unicode => {
-					dict[unicode] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
+					map[unicode] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 				});
 			}
 		}
 		drawX += width + resolvedSizeOption.margin;
 	});
 	// NOTE: missingGlyphが末尾でない仕様が許されるか？
-	return {map: dict, missingGlyph};
+	return {map, missingGlyph};
 }
 
 function isImageGlyph(glyph: Glyph): glyph is ImageGlyph {
