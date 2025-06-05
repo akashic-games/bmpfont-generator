@@ -28,11 +28,66 @@ export function generateBitmap(
     const ctx = cvs.getContext("2d");
     const drawResult = draw(ctx, glyphList, resolvedSizeOption, fontOptions);
 
+	if (!fontOptions.antialias) {
+		console.log(fontOptions.antialias);
+		binarize(ctx, drawResult.map, fontOptions);
+	}
+
 	return Promise.resolve({
         lostChars,
         resolvedSizeOption,
 		canvas: cvs,
 		...drawResult
+	});
+}
+
+type RgbColor = { r: number; g: number; b: number };
+
+function colorNameToRgb(color: string): RgbColor {
+	const cvs = canvas.createCanvas(1, 1);
+	const ctx = cvs.getContext("2d");
+	ctx.fillStyle = color;
+	ctx.fillRect(0, 0, 1, 1);
+	const data = ctx.getImageData(0, 0, 1, 1).data;
+	return {
+		r: data[0],
+		g: data[1],
+		b: data[2],
+	};
+}
+
+function calcColorDistance(color1: RgbColor,color2: RgbColor): number {
+	return (
+		// NOTE: 色ベクトル同士の大きさを比較できれば良いので厳密に平方根を求める必要はない
+		Math.pow(color1.r - color2.r, 2) + Math.pow(color1.g - color2.g, 2) + Math.pow(color1.b - color2.b, 2)
+	);
+}
+
+function binarize(ctx: canvas.SKRSContext2D, map: BitmapDictionary, fontOptions: FontRenderingOptions) {
+	const threshold = 129;
+	const fillColor = colorNameToRgb(fontOptions.fillColor);
+	const strokeColor = fontOptions.strokeColor ? colorNameToRgb(fontOptions.strokeColor) : undefined;
+
+	Object.values(map).forEach((e: BitmapDictionaryEelement) => {
+		const imageData = ctx.getImageData(e.x, e.y, e.width!, e.height!); // TODO: ブランチ元ではoptionalではないのでマージ後に直す
+		const data = imageData.data;
+		for (let i = 0; i < data.length; i+=4) {
+			const alpha = data[i + 3];
+			if (alpha < threshold) {
+				data[i + 3] = 0;
+				continue;
+			};
+			const pixelRgb = {r: data[i], g: data[i + 1], b: data[i + 2]};
+			let color = fillColor;
+			if (strokeColor &&
+				calcColorDistance(pixelRgb, fillColor) > calcColorDistance(pixelRgb, strokeColor)
+			) color = strokeColor;
+			data[i] = color.r;
+			data[i + 1] = color.g;
+			data[i + 2] = color.b;
+			data[i + 3] = 255;
+		}
+		ctx.putImageData(imageData, e.x, e.y);
 	});
 }
 
