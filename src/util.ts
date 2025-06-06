@@ -30,49 +30,47 @@ export function updateGlyphListWithImage(
 	charGlyphList: CharGlyph[],
 	chars: (string | canvas.Image)[],
 	unitsPerEm: number,
-	resolvedSizeOption: ResolvedSizeOptions
+	resolvedSizeOptions: ResolvedSizeOptions
 ): Glyph[] {
-	const descend = getMinDescend(charGlyphList, resolvedSizeOption.height + resolvedSizeOption.margin, unitsPerEm);
 	const glyphList: Glyph[] = charGlyphList;
 
 	chars.forEach(charOrImage => {
 		if (typeof charOrImage !== "string") {
 			const mgScale = charOrImage.width / charOrImage.height;
-			const mgWidth = Math.ceil((resolvedSizeOption.baselineHeight + descend) * mgScale);
+			const mgWidth = Math.ceil((resolvedSizeOptions.baselineHeight + resolvedSizeOptions.descend) * mgScale);
 			glyphList.push({ width: mgWidth, image: charOrImage } satisfies ImageGlyph);
 		}
 	});
 	return glyphList;
 }
 
-function getMinDescend(glyphList: CharGlyph[], height: number, defaultUnitsPerEm: number): number {
-	const descend = Math.min.apply(Math, glyphList.map((g: CharGlyph) => {
-		const scale = 1 / (g.glyph.path.unitsPerEm ?? defaultUnitsPerEm) * height;
-		const metrics = g.glyph.getMetrics();
-		return metrics.yMin * scale;
-	}));
-	return Math.ceil(Math.abs(descend));
-}
-
 export function resolveSizeOptions(glyphList: CharGlyph[], sizeOptions: SizeOptions, font: opentype.Font): ResolvedSizeOptions {
-	const baselineHeight = sizeOptions.baselineHeight ?? getMaxBaseline(glyphList, sizeOptions.height, font.unitsPerEm);
-	const descendAbs = getMinDescend(glyphList, sizeOptions.height + sizeOptions.margin, font.unitsPerEm);
-	const requiredHeight = baselineHeight + descendAbs;
+	const metrics = calcMetrics(glyphList, sizeOptions.height, font.unitsPerEm);
+	const baselineHeight = metrics.baseline;
+	const descend = metrics.descend;
+	const requiredHeight = baselineHeight + descend;
 	const lineHeight = Math.max(requiredHeight, sizeOptions.height);
 	return {
 		...sizeOptions,
 		baselineHeight,
 		requiredHeight,
 		lineHeight,
+		descend
 	} as ResolvedSizeOptions;
 }
 
-function getMaxBaseline(glyphList: CharGlyph[], height: number, defaultUnitsPerEm: number): number {
-	return Math.ceil(Math.max.apply(Math, glyphList.map((g: CharGlyph) => {
+function calcMetrics(glyphList: CharGlyph[], height: number, defaultUnitsPerEm: number): {descend: number, baseline: number} {
+	const metrics = glyphList.reduce<{descend: number, baseline: number}>((prev, g: CharGlyph, index, arr) => {
 		const scale = 1 / (g.glyph.path.unitsPerEm ?? defaultUnitsPerEm) * height;
 		const metrics = g.glyph.getMetrics();
-		return metrics.yMax * scale;
-	})));
+		const descend = metrics.yMin * scale;
+		const baseline = metrics.yMax * scale;
+
+		prev.descend = !prev.descend ? descend : Math.min(prev.descend, descend);
+		prev.baseline = !prev.baseline ? baseline : Math.max(prev.baseline, baseline);
+		return prev;
+	}, {descend: undefined, baseline: undefined} as any);
+	return metrics;
 }
 
 export function calculateCanvasSize(

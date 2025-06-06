@@ -49,8 +49,8 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 			param.json,
 			JSON.stringify({
 				map: map, missingGlyph: missingGlyph,
-				width: resolvedSizeOption.fixedWidth,
-				height: resolvedSizeOption.lineHeight
+				width: resolvedSizeOptions.fixedWidth,
+				height: resolvedSizeOptions.lineHeight
 			})
 		);
 	}

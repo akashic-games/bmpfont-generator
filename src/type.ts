@@ -66,6 +66,8 @@ export interface ResolvedSizeOptions extends SizeOptions {
 	 * 旧adjustedHeight相当。
 	 */
 	lineHeight: number;
+
+	descend: number;
 }
 
 export type Glyph = CharGlyph | ImageGlyph;
