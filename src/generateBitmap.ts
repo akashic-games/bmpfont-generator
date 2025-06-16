@@ -16,17 +16,17 @@ import {
 } from "./util";
 
 export function generateBitmap(
-	chars: (string | canvas.Image)[],
+	// chars: (string | canvas.Image)[],
+	chars: (string | { key: number, image: canvas.Image })[],
 	fontOptions: FontRenderingOptions,
 	sizeOptions: SizeOptions
 ): Promise<{
 		canvas: canvas.Canvas;
 		map: GlyphLocationMap;
 		missingGlyph: GlyphLocation;
-		lostChars: string[];
+		missingGlyph: GlyphLocation;lostChars: string[];
 		resolvedSizeOptions: ResolvedSizeOptions;
 	}> {
-	const { charGlyphList, lostChars } = charsToGlyphList(chars, fontOptions.font, sizeOptions);
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
 
 	let glyphList: Glyph[];

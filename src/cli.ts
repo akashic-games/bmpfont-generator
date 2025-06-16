@@ -7,6 +7,7 @@ import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmap } from "./generateBitmap";
 import type { BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
+import { charsToGlyphList } from "./util";
 
 export async function run(argv: string[]): Promise<void> {
 	const config = parseArguments(argv);
@@ -32,9 +33,13 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	};
 
 	const chars: (string | canvas.Image)[] = param.chars.split("");
-	if (param.missingGlyph) chars.push(param.missingGlyph);
+	// if (param.missingGlyph) chars.push(param.missingGlyph);
 
-	const { canvas, map, missingGlyph, resolvedSizeOptions, lostChars } = await generateBitmap(chars, fontOptions, sizeOptions);
+	const { charGlyphList, lostChars } = charsToGlyphList(chars, fontOptions.font, sizeOptions);
+	const charAndMissingGlyph = {
+		"missingGlyph": param.missingGlyph
+		...chars};
+	const { canvas, map, missingGlyph, resolvedSizeOptions } = await generateBitmap(charAndMissingGlyph, fontOptions, sizeOptions);
 
 	if (lostChars.length > 0) {
 		console.log(
@@ -48,7 +53,8 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 		await writeFile(
 			param.json,
 			JSON.stringify({
-				map: map, missingGlyph: missingGlyph,
+				map: map,
+				missingGlyph: missingGlyph,
 				width: resolvedSizeOptions.fixedWidth,
 				height: resolvedSizeOptions.lineHeight
 			})
