@@ -6,7 +6,8 @@ import type {
 	Glyph,
 	ImageGlyph,
 	GlyphLocation,
-	GlyphLocationMap
+	GlyphLocationMap,
+	GlyphSourceTable
 } from "./type";
 import {
 	calculateCanvasSize,
@@ -17,16 +18,18 @@ import {
 
 export function generateBitmap(
 	// chars: (string | canvas.Image)[],
-	chars: (string | { key: number, image: canvas.Image })[],
+	// chars: (string | { key: string, src: string | canvas.Image })[],
+	sourceTable: GlyphSourceTable,
 	fontOptions: FontRenderingOptions,
 	sizeOptions: SizeOptions
 ): Promise<{
 		canvas: canvas.Canvas;
 		map: GlyphLocationMap;
 		missingGlyph: GlyphLocation;
-		missingGlyph: GlyphLocation;lostChars: string[];
+		lostChars: string[];
 		resolvedSizeOptions: ResolvedSizeOptions;
 	}> {
+	const { charGlyphList, lostChars } = charsToGlyphList(chars, fontOptions.font, sizeOptions);
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
 
 	let glyphList: Glyph[];

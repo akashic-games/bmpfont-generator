@@ -6,7 +6,7 @@ import * as canvas from "canvas";
 import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmap } from "./generateBitmap";
-import type { BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
+import type { BmpfontGeneratorCliConfig, FontRenderingOptions, GlyphSourceTable, SizeOptions } from "./type";
 import { charsToGlyphList } from "./util";
 
 export async function run(argv: string[]): Promise<void> {
@@ -32,14 +32,16 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 		margin: param.margin,
 	};
 
-	const chars: (string | canvas.Image)[] = param.chars.split("");
+	const chars: string[] = param.chars.split("");
 	// if (param.missingGlyph) chars.push(param.missingGlyph);
 
-	const { charGlyphList, lostChars } = charsToGlyphList(chars, fontOptions.font, sizeOptions);
-	const charAndMissingGlyph = {
-		"missingGlyph": param.missingGlyph
-		...chars};
-	const { canvas, map, missingGlyph, resolvedSizeOptions } = await generateBitmap(charAndMissingGlyph, fontOptions, sizeOptions);
+	// const charAndMissingGlyph: (string | { key: string, src: string | canvas.Image })[] = chars;
+	const sourceTable: GlyphSourceTable = chars.reduce((table, ch) => {
+		table[ch.charCodeAt(0)] = ch;
+		return table;
+	}, {} as GlyphSourceTable);
+	sourceTable["missingGlyph"] = param.missingGlyph ?? "";
+	const { canvas, map, missingGlyph, resolvedSizeOptions, lostChars } = await generateBitmap(sourceTable, fontOptions, sizeOptions);
 
 	if (lostChars.length > 0) {
 		console.log(

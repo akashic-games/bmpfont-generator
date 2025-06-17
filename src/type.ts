@@ -7,7 +7,6 @@ export interface BmpfontGeneratorCliConfig {
 	height: number;
 	chars: string;
 	missingGlyph?: string | Image;
-	missingGlyphImage?: string;
 	fill: string;
 	stroke?: string;
 	strokeWidth: number;
@@ -91,4 +90,8 @@ export interface GlyphLocation {
 	y: number;
 	width: number;
 	height: number;
+}
+
+export interface GlyphSourceTable {
+	[key: string]: string | Image;
 }
