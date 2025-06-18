@@ -92,6 +92,10 @@ export interface GlyphLocation {
 	height: number;
 }
 
-export interface GlyphSourceTable {
-	[key: string]: string | Image;
+export interface GlyphSourceTable<T> {
+	[key: string]: T;
+}
+
+export interface BitmapResourceTable<T> {
+	[key: string]: T;
 }

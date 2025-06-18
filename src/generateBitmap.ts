@@ -7,37 +7,41 @@ import type {
 	ImageGlyph,
 	GlyphLocation,
 	GlyphLocationMap,
-	GlyphSourceTable
+	GlyphSourceTable,
+	CharGlyph,
+	BitmapResourceTable
 } from "./type";
 import {
 	calculateCanvasSize,
 	resolveSizeOptions,
 	charsToGlyphList,
-	updateGlyphListWithImage
+	applyImageResourceTable
 } from "./util";
 
 export function generateBitmap(
-	// chars: (string | canvas.Image)[],
-	// chars: (string | { key: string, src: string | canvas.Image })[],
-	sourceTable: GlyphSourceTable,
+	sourceTable: GlyphSourceTable<string | canvas.Image>,
 	fontOptions: FontRenderingOptions,
 	sizeOptions: SizeOptions
 ): Promise<{
 		canvas: canvas.Canvas;
 		map: GlyphLocationMap;
-		missingGlyph: GlyphLocation;
 		lostChars: string[];
 		resolvedSizeOptions: ResolvedSizeOptions;
 	}> {
-	const { charGlyphList, lostChars } = charsToGlyphList(chars, fontOptions.font, sizeOptions);
+	const { charResourceTable, lostChars, imageSourceTable } = charsToGlyphList(sourceTable, fontOptions.font, sizeOptions);
+	const charGlyphList: CharGlyph[] = Object.values(charResourceTable);
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
 
-	let glyphList: Glyph[];
-	if (chars.some(charOrImage => typeof charOrImage !== "string")) {
-		glyphList = updateGlyphListWithImage(charGlyphList, chars, fontOptions.font.unitsPerEm, resolvedSizeOptions);
+	let bitmapResourceTable: BitmapResourceTable<Glyph>;
+
+	if (Object.keys(imageSourceTable).length > 0) {
+		// glyphList = updateGlyphListWithImage(charGlyphList, chars, fontOptions.font.unitsPerEm, resolvedSizeOptions);
+		bitmapResourceTable = applyImageResourceTable(charResourceTable, imageSourceTable, resolvedSizeOptions);
 	} else {
-		glyphList = charGlyphList;
+		// glyphList = charGlyphList;
+		bitmapResourceTable = charResourceTable;
 	}
+	let glyphList: Glyph[] = Object.values(bitmapResourceTable);
 
 	const canvasSize = calculateCanvasSize(
 		glyphList,
@@ -49,31 +53,29 @@ export function generateBitmap(
 	const ctx = cvs.getContext("2d");
 	if (!fontOptions.antialias) ctx.antialias = "none";
 
-	const drawResult = draw(ctx, glyphList, resolvedSizeOptions, fontOptions);
+	const map = draw(ctx, bitmapResourceTable, resolvedSizeOptions, fontOptions);
 
 	return Promise.resolve({
 		lostChars,
 		resolvedSizeOptions,
 		canvas: cvs,
-		...drawResult
+		map
 	});
 }
 
 function draw(
 	ctx: canvas.CanvasRenderingContext2D,
-	glyphList: Glyph[],
+	// glyphList: Glyph[],
+	bitmapResourceTable: BitmapResourceTable<Glyph>,
 	resolvedSizeOption: ResolvedSizeOptions,
 	fontOptions: FontRenderingOptions
-): {
-		map: GlyphLocationMap;
-		missingGlyph: GlyphLocation;
-	} {
+): GlyphLocationMap {
 	let drawX = resolvedSizeOption.margin;
 	let drawY = resolvedSizeOption.margin;
-	let missingGlyph!: GlyphLocation;
 	const map: GlyphLocationMap = {};
 
-	glyphList.forEach((glyph: Glyph, index: number) => {
+	Object.keys(bitmapResourceTable).forEach(key => {
+		const glyph = bitmapResourceTable[key];
 		const width = resolvedSizeOption.fixedWidth ?? glyph.width + resolvedSizeOption.margin;
 		if (drawX + width > ctx.canvas.width) {
 			drawX = resolvedSizeOption.margin;
@@ -82,8 +84,6 @@ function draw(
 
 		if (isImageGlyph(glyph)) {
 			ctx.drawImage(glyph.image, drawX, drawY, glyph.width, resolvedSizeOption.lineHeight);
-			// NOTE: glyphListにImageGlyphが2つ以上入りうる型になっているが0~1個を暗黙に仮定して良いか
-			missingGlyph = {x: drawX, y: drawY, width: glyph.width, height: resolvedSizeOption.lineHeight};
 		} else {
 			const path = glyph.glyph.getPath(
 				drawX + (width / 2) - (glyph.width / 2), drawY + resolvedSizeOption.baselineHeight, resolvedSizeOption.height);
@@ -92,19 +92,16 @@ function draw(
 			path.strokeWidth = fontOptions.strokeWidth;
 			path.draw(ctx as unknown as CanvasRenderingContext2D); // NOTE: oepntype.jsとcanvasのCanvasRenderingContext2Dが一致しないためunknownを経由する
 
-			// NOTE: missingGlyphが最後まで無い場合、最後の文字をmissingGlyphにしてよいかどうか
-			if (index === glyphList.length - 1 && !missingGlyph) {
-				missingGlyph = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
-			} else {
-				glyph.glyph.unicodes.forEach(unicode => {
-					map[unicode] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
-				});
-			}
+			map[key as any] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
+			glyph.glyph.unicodes.forEach(unicode => {
+				map[unicode] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
+			});
 		}
 		drawX += width + resolvedSizeOption.margin;
 	});
+
 	// NOTE: missingGlyphが末尾でない仕様が許されるか？
-	return {map, missingGlyph};
+	return map;
 }
 
 function isImageGlyph(glyph: Glyph): glyph is ImageGlyph {

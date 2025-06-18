@@ -36,12 +36,14 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	// if (param.missingGlyph) chars.push(param.missingGlyph);
 
 	// const charAndMissingGlyph: (string | { key: string, src: string | canvas.Image })[] = chars;
-	const sourceTable: GlyphSourceTable = chars.reduce((table, ch) => {
+	const sourceTable: GlyphSourceTable<string | canvas.Image> = chars.reduce((table, ch) => {
 		table[ch.charCodeAt(0)] = ch;
 		return table;
-	}, {} as GlyphSourceTable);
+	}, {} as GlyphSourceTable<string | canvas.Image>);
 	sourceTable["missingGlyph"] = param.missingGlyph ?? "";
-	const { canvas, map, missingGlyph, resolvedSizeOptions, lostChars } = await generateBitmap(sourceTable, fontOptions, sizeOptions);
+	console.log("param.missingGlyph", param.missingGlyph);
+	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmap(sourceTable, fontOptions, sizeOptions);
+	const missingGlyph = map["missingGlyph" as any];
 
 	if (lostChars.length > 0) {
 		console.log(
@@ -55,8 +57,8 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 		await writeFile(
 			param.json,
 			JSON.stringify({
-				map: map,
-				missingGlyph: missingGlyph,
+				map,
+				missingGlyph,
 				width: resolvedSizeOptions.fixedWidth,
 				height: resolvedSizeOptions.lineHeight
 			})
