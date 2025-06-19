@@ -55,7 +55,7 @@ export function applyImageResourceTable(
 	imageSourceTable:  GlyphSourceTable<canvas.Image>,
 	resolvedSizeOptions: ResolvedSizeOptions
 ): GlyphSourceTable<Glyph> {
-	const glyphSsourceTable: GlyphSourceTable<Glyph> = charGlyphTable; 
+	const glyphSsourceTable: GlyphSourceTable<Glyph> = charGlyphTable;
 	Object.keys(imageSourceTable).forEach(key => {
 		const img = imageSourceTable[key];
 		const mgScale = img.width / img.height;
