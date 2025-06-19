@@ -33,16 +33,12 @@ export function generateBitmap(
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
 
 	let bitmapResourceTable: BitmapResourceTable<Glyph>;
-
 	if (Object.keys(imageSourceTable).length > 0) {
-		// glyphList = updateGlyphListWithImage(charGlyphList, chars, fontOptions.font.unitsPerEm, resolvedSizeOptions);
 		bitmapResourceTable = applyImageResourceTable(charResourceTable, imageSourceTable, resolvedSizeOptions);
 	} else {
-		// glyphList = charGlyphList;
 		bitmapResourceTable = charResourceTable;
 	}
-	let glyphList: Glyph[] = Object.values(bitmapResourceTable);
-
+	const glyphList: Glyph[] = Object.values(bitmapResourceTable);
 	const canvasSize = calculateCanvasSize(
 		glyphList,
 		resolvedSizeOptions.fixedWidth,
@@ -54,7 +50,6 @@ export function generateBitmap(
 	if (!fontOptions.antialias) ctx.antialias = "none";
 
 	const map = draw(ctx, bitmapResourceTable, resolvedSizeOptions, fontOptions);
-
 	return Promise.resolve({
 		lostChars,
 		resolvedSizeOptions,
@@ -92,15 +87,14 @@ function draw(
 			path.strokeWidth = fontOptions.strokeWidth;
 			path.draw(ctx as unknown as CanvasRenderingContext2D); // NOTE: oepntype.jsとcanvasのCanvasRenderingContext2Dが一致しないためunknownを経由する
 
-			map[key as any] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 			glyph.glyph.unicodes.forEach(unicode => {
 				map[unicode] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 			});
 		}
+		map[key as any] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 		drawX += width + resolvedSizeOption.margin;
 	});
 
-	// NOTE: missingGlyphが末尾でない仕様が許されるか？
 	return map;
 }
 

@@ -127,7 +127,7 @@ export function calculateCanvasSize(
 
 function requiredCanvasHeight(glyphList: Glyph[], canvasWidth: number, lineHeight: number, margin: number): number {
 	let drawX = margin;
-	let drawY = margin;
+	let drawY = margin + lineHeight;
 
 	glyphList.forEach((g: Glyph) => {
 		if (drawX + g.width + margin >= canvasWidth) {

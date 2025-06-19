@@ -41,7 +41,6 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 		return table;
 	}, {} as GlyphSourceTable<string | canvas.Image>);
 	sourceTable["missingGlyph"] = param.missingGlyph ?? "";
-	console.log("param.missingGlyph", param.missingGlyph);
 	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmap(sourceTable, fontOptions, sizeOptions);
 	const missingGlyph = map["missingGlyph" as any];
 
