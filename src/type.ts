@@ -92,10 +92,9 @@ export interface GlyphLocation {
 	height: number;
 }
 
+/**
+ * キーのunicodeに対して、対応する文字列またはCanvas、またはGlyphを紐づけるテーブル
+ */
 export interface GlyphSourceTable<T> {
-	[key: string]: T;
-}
-
-export interface BitmapResourceTable<T> {
 	[key: string]: T;
 }

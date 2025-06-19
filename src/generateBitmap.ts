@@ -8,8 +8,7 @@ import type {
 	GlyphLocation,
 	GlyphLocationMap,
 	GlyphSourceTable,
-	CharGlyph,
-	BitmapResourceTable
+	CharGlyph
 } from "./type";
 import {
 	calculateCanvasSize,
@@ -28,17 +27,17 @@ export function generateBitmap(
 		lostChars: string[];
 		resolvedSizeOptions: ResolvedSizeOptions;
 	}> {
-	const { charResourceTable, lostChars, imageSourceTable } = charsToGlyphList(sourceTable, fontOptions.font, sizeOptions);
-	const charGlyphList: CharGlyph[] = Object.values(charResourceTable);
+	const { charGlyphTable, lostChars, imageSourceTable } = charsToGlyphList(sourceTable, fontOptions.font, sizeOptions);
+	const charGlyphList: CharGlyph[] = Object.values(charGlyphTable);
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
 
-	let bitmapResourceTable: BitmapResourceTable<Glyph>;
+	let glyphSourceTable: GlyphSourceTable<Glyph>;
 	if (Object.keys(imageSourceTable).length > 0) {
-		bitmapResourceTable = applyImageResourceTable(charResourceTable, imageSourceTable, resolvedSizeOptions);
+		glyphSourceTable = applyImageResourceTable(charGlyphTable, imageSourceTable, resolvedSizeOptions);
 	} else {
-		bitmapResourceTable = charResourceTable;
+		glyphSourceTable = charGlyphTable;
 	}
-	const glyphList: Glyph[] = Object.values(bitmapResourceTable);
+	const glyphList: Glyph[] = Object.values(glyphSourceTable);
 	const canvasSize = calculateCanvasSize(
 		glyphList,
 		resolvedSizeOptions.fixedWidth,
@@ -49,7 +48,7 @@ export function generateBitmap(
 	const ctx = cvs.getContext("2d");
 	if (!fontOptions.antialias) ctx.antialias = "none";
 
-	const map = draw(ctx, bitmapResourceTable, resolvedSizeOptions, fontOptions);
+	const map = draw(ctx, glyphSourceTable, resolvedSizeOptions, fontOptions);
 	return Promise.resolve({
 		lostChars,
 		resolvedSizeOptions,
@@ -60,8 +59,7 @@ export function generateBitmap(
 
 function draw(
 	ctx: canvas.CanvasRenderingContext2D,
-	// glyphList: Glyph[],
-	bitmapResourceTable: BitmapResourceTable<Glyph>,
+	glyphSourceTable: GlyphSourceTable<Glyph>,
 	resolvedSizeOption: ResolvedSizeOptions,
 	fontOptions: FontRenderingOptions
 ): GlyphLocationMap {
@@ -69,8 +67,8 @@ function draw(
 	let drawY = resolvedSizeOption.margin;
 	const map: GlyphLocationMap = {};
 
-	Object.keys(bitmapResourceTable).forEach(key => {
-		const glyph = bitmapResourceTable[key];
+	Object.keys(glyphSourceTable).forEach(key => {
+		const glyph = glyphSourceTable[key];
 		const width = resolvedSizeOption.fixedWidth ?? glyph.width + resolvedSizeOption.margin;
 		if (drawX + width > ctx.canvas.width) {
 			drawX = resolvedSizeOption.margin;

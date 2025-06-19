@@ -1,20 +1,18 @@
 import type * as canvas from "canvas";
 import type * as opentype from "opentype.js";
-import type { SizeOptions, Glyph, ResolvedSizeOptions, CharGlyph, ImageGlyph, GlyphSourceTable, BitmapResourceTable } from "./type";
+import type { SizeOptions, Glyph, ResolvedSizeOptions, CharGlyph, ImageGlyph, GlyphSourceTable } from "./type";
 
 export function charsToGlyphList(
 	sourceTable: GlyphSourceTable<string | canvas.Image>,
 	font: opentype.Font,
 	sizeOptions: SizeOptions
 ): {
-		// charGlyphList: CharGlyph[];
-		charResourceTable: BitmapResourceTable<CharGlyph>;
+		charGlyphTable: GlyphSourceTable<CharGlyph>;
 		lostChars: string[];
 		imageSourceTable: GlyphSourceTable<canvas.Image>;
 	} {
 	
-	// const charGlyphList: CharGlyph[] = [];
-	const charResourceTable: BitmapResourceTable<CharGlyph> = {};
+	const charGlyphTable: GlyphSourceTable<CharGlyph> = {};
 	const lostChars: string[] = [];
 	const imageSourceTable: GlyphSourceTable<canvas.Image> = {};
 	Object.keys(sourceTable).forEach(key => {
@@ -28,11 +26,10 @@ export function charsToGlyphList(
 		glyph.forEach((g) => {
 			if (g.unicodes.length === 0) lostChars.push(char);
 			const scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * sizeOptions.height;
-			charResourceTable[key] = {glyph: g, width: Math.ceil((g.advanceWidth ?? 0) * scale)};
-			// charGlyphList.push({glyph: g, width: Math.ceil((g.advanceWidth ?? 0) * scale)});
+			charGlyphTable[key] = {glyph: g, width: Math.ceil((g.advanceWidth ?? 0) * scale)};
 		});
 	});
-	return { charResourceTable, lostChars, imageSourceTable };
+	return { charGlyphTable, lostChars, imageSourceTable };
 }
 
 function updateGlyphListWithImage(
@@ -54,18 +51,18 @@ function updateGlyphListWithImage(
 }
 
 export function applyImageResourceTable(
-	charResourceTable: BitmapResourceTable<CharGlyph>,
+	charGlyphTable: GlyphSourceTable<CharGlyph>,
 	imageSourceTable:  GlyphSourceTable<canvas.Image>,
 	resolvedSizeOptions: ResolvedSizeOptions
-): BitmapResourceTable<Glyph> {
-	const bitmapResourceTable: BitmapResourceTable<Glyph> = charResourceTable; 
+): GlyphSourceTable<Glyph> {
+	const glyphSsourceTable: GlyphSourceTable<Glyph> = charGlyphTable; 
 	Object.keys(imageSourceTable).forEach(key => {
 		const img = imageSourceTable[key];
 		const mgScale = img.width / img.height;
 		const mgWidth = Math.ceil((resolvedSizeOptions.baselineHeight + resolvedSizeOptions.descend) * mgScale);
-		bitmapResourceTable[key] = { width: mgWidth, image: img } satisfies ImageGlyph;
+		glyphSsourceTable[key] = { width: mgWidth, image: img } satisfies ImageGlyph;
 	});
-	return bitmapResourceTable;
+	return glyphSsourceTable;
 }
 
 export function resolveSizeOptions(glyphList: CharGlyph[], sizeOptions: SizeOptions, font: opentype.Font): ResolvedSizeOptions {
