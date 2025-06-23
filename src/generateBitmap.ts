@@ -29,7 +29,6 @@ export function generateBitmap(
     const drawResult = draw(ctx, glyphList, resolvedSizeOption, fontOptions);
 
 	if (!fontOptions.antialias) {
-		console.log(fontOptions.antialias);
 		binarize(ctx, drawResult.map, fontOptions);
 	}
 
