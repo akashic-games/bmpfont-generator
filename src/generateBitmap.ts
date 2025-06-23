@@ -56,14 +56,14 @@ function colorNameToRgb(color: string): RgbColor {
 	};
 }
 
-function calcColorDistance(color1: RgbColor,color2: RgbColor): number {
+function calcColorDistance(color1: RgbColor, color2: RgbColor): number {
 	return (
-		// NOTE: 色ベクトル同士の大きさを比較できれば良いので厳密に平方根を求める必要はない
+		// NOTE: 色ベクトル同士の大きさを比較できれば良いので、sqrtで厳密な平方根を求める必要はない
 		Math.pow(color1.r - color2.r, 2) + Math.pow(color1.g - color2.g, 2) + Math.pow(color1.b - color2.b, 2)
 	);
 }
 
-function binarize(ctx: canvas.SKRSContext2D, map: BitmapDictionary, fontOptions: FontRenderingOptions) {
+function binarize(ctx: canvas.SKRSContext2D, map: BitmapDictionary, fontOptions: FontRenderingOptions): void {
 	const threshold = 129;
 	const fillColor = colorNameToRgb(fontOptions.fillColor);
 	const strokeColor = fontOptions.strokeColor ? colorNameToRgb(fontOptions.strokeColor) : undefined;
