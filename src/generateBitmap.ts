@@ -3,15 +3,18 @@ import type {
 	FontRenderingOptions,
 	SizeOptions,
 	ResolvedSizeOptions,
-	Glyph,
-	ImageGlyph,
 	GlyphLocationMap,
-	GlyphSourceTable,
-	CharGlyph
+	BitmapFontEntryTable,
+	GlyphRenderable,
+	Renderable,
+	ImageRenderable,
+	RenderableTable,
+	ImageBitmapFontEntryTable,
+	GlyphRenderableTable,
 } from "./type";
 
-export function generateBitmap(
-	sourceTable: GlyphSourceTable<string | canvas.Image>,
+export function generateBitmapFont(
+	entryTable: BitmapFontEntryTable,
 	fontOptions: FontRenderingOptions,
 	sizeOptions: SizeOptions
 ): Promise<{
@@ -20,19 +23,18 @@ export function generateBitmap(
 		lostChars: string[];
 		resolvedSizeOptions: ResolvedSizeOptions;
 	}> {
-	const { charGlyphTable, lostChars, imageSourceTable } = charsToGlyphList(sourceTable, fontOptions.font, sizeOptions);
-	const charGlyphList: CharGlyph[] = Object.values(charGlyphTable);
-	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(charGlyphList, sizeOptions, fontOptions.font);
+	const { glyphRenderableTable, lostChars, imageEntryTable } = collectGlyphRenderables(entryTable, fontOptions.font, sizeOptions);
+	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, fontOptions.font);
 
-	let glyphSourceTable: GlyphSourceTable<Glyph>;
-	if (Object.keys(imageSourceTable).length > 0) {
-		glyphSourceTable = applyImageResourceTable(charGlyphTable, imageSourceTable, resolvedSizeOptions);
+	let renderableTable: RenderableTable;
+	if (Object.keys(imageEntryTable).length > 0) {
+		renderableTable = createAndInsertImageRenderableTable(glyphRenderableTable, imageEntryTable, resolvedSizeOptions);
 	} else {
-		glyphSourceTable = charGlyphTable;
+		renderableTable = glyphRenderableTable;
 	}
-	const glyphList: Glyph[] = Object.values(glyphSourceTable);
+	const renderableList: Renderable[] = Object.values(renderableTable);
 	const canvasSize = calculateCanvasSize(
-		glyphList,
+		renderableList,
 		resolvedSizeOptions.fixedWidth,
 		resolvedSizeOptions.lineHeight,
 		resolvedSizeOptions.margin
@@ -41,7 +43,7 @@ export function generateBitmap(
 	const ctx = cvs.getContext("2d");
 	if (!fontOptions.antialias) ctx.antialias = "none";
 
-	const map = draw(ctx, glyphSourceTable, resolvedSizeOptions, fontOptions);
+	const map = draw(ctx, renderableTable, resolvedSizeOptions, fontOptions);
 	return Promise.resolve({
 		lostChars,
 		resolvedSizeOptions,
@@ -52,7 +54,7 @@ export function generateBitmap(
 
 function draw(
 	ctx: canvas.CanvasRenderingContext2D,
-	glyphSourceTable: GlyphSourceTable<Glyph>,
+	renderableTable: RenderableTable,
 	resolvedSizeOption: ResolvedSizeOptions,
 	fontOptions: FontRenderingOptions
 ): GlyphLocationMap {
@@ -60,8 +62,8 @@ function draw(
 	let drawY = resolvedSizeOption.margin;
 	const map: GlyphLocationMap = {};
 
-	Object.keys(glyphSourceTable).forEach(key => {
-		const glyph = glyphSourceTable[key];
+	Object.keys(renderableTable).forEach(key => {
+		const glyph = renderableTable[key];
 		const width = resolvedSizeOption.fixedWidth ?? glyph.width + resolvedSizeOption.margin;
 		if (drawX + width > ctx.canvas.width) {
 			drawX = resolvedSizeOption.margin;
@@ -78,38 +80,39 @@ function draw(
 			path.strokeWidth = fontOptions.strokeWidth;
 			path.draw(ctx as unknown as CanvasRenderingContext2D); // NOTE: oepntype.jsとcanvasのCanvasRenderingContext2Dが一致しないためunknownを経由する
 
+			// NOTE: そのフォントにおけるグリフが対応するunicodesがkeyの値以外にも存在する可能性がある。
+			// 過去のビットマップフォントとの互換性も考慮し、unicodesもmapに含める。
 			glyph.glyph.unicodes.forEach(unicode => {
 				map[unicode] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 			});
 		}
-		map[key as any] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
+		map[key] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 		drawX += width + resolvedSizeOption.margin;
 	});
 
 	return map;
 }
 
-function isImageGlyph(glyph: Glyph): glyph is ImageGlyph {
+function isImageGlyph(glyph: Renderable): glyph is ImageRenderable {
 	return !!(glyph as any).image;
 }
 
-function charsToGlyphList(
-	sourceTable: GlyphSourceTable<string | canvas.Image>,
+function collectGlyphRenderables(
+	entryTable: BitmapFontEntryTable,
 	font: opentype.Font,
 	sizeOptions: SizeOptions
 ): {
-		charGlyphTable: GlyphSourceTable<CharGlyph>;
-		lostChars: string[];
-		imageSourceTable: GlyphSourceTable<canvas.Image>;
-	} {
-	
-	const charGlyphTable: GlyphSourceTable<CharGlyph> = {};
+	glyphRenderableTable: GlyphRenderableTable;
+	lostChars: string[];
+	imageEntryTable: ImageBitmapFontEntryTable;
+} {
+	const glyphRenderableTable: GlyphRenderableTable = {};
 	const lostChars: string[] = [];
-	const imageSourceTable: GlyphSourceTable<canvas.Image> = {};
-	Object.keys(sourceTable).forEach(key => {
-		const char = sourceTable[key];
+	const imageEntryTable: ImageBitmapFontEntryTable = {};
+	Object.keys(entryTable).forEach(key => {
+		const char = entryTable[key];
 		if (typeof char !== "string") {
-			imageSourceTable[key] = char;
+			imageEntryTable[key] = char;
 			return;
 		};
 
@@ -117,29 +120,40 @@ function charsToGlyphList(
 		glyph.forEach((g) => {
 			if (g.unicodes.length === 0) lostChars.push(char);
 			const scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * sizeOptions.height;
-			charGlyphTable[key] = {glyph: g, width: Math.ceil((g.advanceWidth ?? 0) * scale)};
+			glyphRenderableTable[key] = {glyph: g, width: Math.ceil((g.advanceWidth ?? 0) * scale)};
 		});
 	});
-	return { charGlyphTable, lostChars, imageSourceTable };
+	return { glyphRenderableTable, lostChars, imageEntryTable };
 }
 
-function applyImageResourceTable(
-	charGlyphTable: GlyphSourceTable<CharGlyph>,
-	imageSourceTable:  GlyphSourceTable<canvas.Image>,
+function createAndInsertImageRenderableTable(
+	glyphRenderableTable: GlyphRenderableTable,
+	imageEntryTable:  ImageBitmapFontEntryTable,
 	resolvedSizeOptions: ResolvedSizeOptions
-): GlyphSourceTable<Glyph> {
-	const glyphSsourceTable: GlyphSourceTable<Glyph> = charGlyphTable;
-	Object.keys(imageSourceTable).forEach(key => {
-		const img = imageSourceTable[key];
+): RenderableTable {
+	const renderableTable: RenderableTable = glyphRenderableTable;
+	Object.keys(imageEntryTable).forEach(key => {
+		const img = imageEntryTable[key];
 		const mgScale = img.width / img.height;
 		const mgWidth = Math.ceil((resolvedSizeOptions.baselineHeight + resolvedSizeOptions.descend) * mgScale);
-		glyphSsourceTable[key] = { width: mgWidth, image: img } satisfies ImageGlyph;
+		renderableTable[key] = { width: mgWidth, image: img } satisfies ImageRenderable;
 	});
-	return glyphSsourceTable;
+	return renderableTable;
 }
 
-function resolveSizeOptions(glyphList: CharGlyph[], sizeOptions: SizeOptions, font: opentype.Font): ResolvedSizeOptions {
-	const metrics = calcMetrics(glyphList, sizeOptions.height, font.unitsPerEm);
+function resolveSizeOptions(glyphRenderableTable: GlyphRenderableTable, sizeOptions: SizeOptions, font: opentype.Font): ResolvedSizeOptions {
+	if (Object.keys(glyphRenderableTable).length === 0) throw new Error("List has no Glyph");
+	const metrics = Object.values(glyphRenderableTable).reduce<{descend: number, baseline: number}>((prev, g: GlyphRenderable) => {
+		const scale = 1 / (g.glyph.path.unitsPerEm ?? font.unitsPerEm) * sizeOptions.height;
+		const metrics = g.glyph.getMetrics();
+		const descend = metrics.yMin * scale;
+		const baseline = metrics.yMax * scale;
+
+		prev.descend = Math.min(prev.descend, descend);
+		prev.baseline = Math.max(prev.baseline, baseline);
+		return prev;
+	}, { descend: Infinity, baseline: -Infinity });
+
 	const baselineHeight = metrics.baseline;
 	const descend = metrics.descend;
 	const requiredHeight = baselineHeight + descend;
@@ -153,27 +167,13 @@ function resolveSizeOptions(glyphList: CharGlyph[], sizeOptions: SizeOptions, fo
 	} as ResolvedSizeOptions;
 }
 
-function calcMetrics(glyphList: CharGlyph[], height: number, defaultUnitsPerEm: number): {descend: number, baseline: number} {
-	const metrics = glyphList.reduce<{descend: number, baseline: number}>((prev, g: CharGlyph, index, arr) => {
-		const scale = 1 / (g.glyph.path.unitsPerEm ?? defaultUnitsPerEm) * height;
-		const metrics = g.glyph.getMetrics();
-		const descend = metrics.yMin * scale;
-		const baseline = metrics.yMax * scale;
-
-		prev.descend = !prev.descend ? descend : Math.min(prev.descend, descend);
-		prev.baseline = !prev.baseline ? baseline : Math.max(prev.baseline, baseline);
-		return prev;
-	}, {descend: undefined, baseline: undefined} as any);
-	return metrics;
-}
-
 function calculateCanvasSize(
-	glyphList: Glyph[], charWidth: number | undefined, lineHeight: number, margin: number): {width: number; height: number} {
-	const width = charWidth ?? glyphList.reduce((acc, g) => acc + g.width + margin, 0) / glyphList.length;
+	renderableList: Renderable[], charWidth: number | undefined, lineHeight: number, margin: number): {width: number; height: number} {
+	const width = charWidth ?? renderableList.reduce((acc, g) => acc + g.width + margin, 0) / renderableList.length;
 
 	if (width <= 0 || lineHeight <= 0) return {width: -1, height: -1};
 
-	const glyphCount = glyphList.length + 1;
+	const glyphCount = renderableList.length + 1;
 	const MULTIPLE_OF_CANVAS_HEIGHT = 4;
 
 	let canvasSquareSideSize = 1;
@@ -190,21 +190,18 @@ function calculateCanvasSize(
 
 	let height = canvasHeight;
 	// widthAverageから導出した場合、サイズが不足する場合があるためGlyphを並べた際に必要なheightを導出する
-	if (!charWidth) height = requiredCanvasHeight(glyphList, canvasWidth, lineHeight, margin);
+	if (!charWidth) {
+		let drawX = margin;
+		let drawY = margin + lineHeight;
 
+		renderableList.forEach((g: Renderable) => {
+			if (drawX + g.width + margin >= canvasWidth) {
+				drawX = margin;
+				drawY += lineHeight + margin;
+			}
+			drawX += g.width + margin;
+		});
+		height = drawY;
+	}
 	return {width: canvasWidth, height};
-}
-
-function requiredCanvasHeight(glyphList: Glyph[], canvasWidth: number, lineHeight: number, margin: number): number {
-	let drawX = margin;
-	let drawY = margin + lineHeight;
-
-	glyphList.forEach((g: Glyph) => {
-		if (drawX + g.width + margin >= canvasWidth) {
-			drawX = margin;
-			drawY += lineHeight + margin;
-		}
-		drawX += g.width + margin;
-	});
-	return drawY;
 }

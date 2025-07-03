@@ -69,20 +69,36 @@ export interface ResolvedSizeOptions extends SizeOptions {
 	descend: number;
 }
 
-export type Glyph = CharGlyph | ImageGlyph;
+export type BitmapFontEntry = string | Image;
 
-export interface CharGlyph {
+export type BitmapFontEntryTable = Record<string, BitmapFontEntry>;
+export type ImageBitmapFontEntryTable = Record<string, Image>;
+
+
+/**
+ * ビットマップフォント "画像" に「敷き詰めて」「描けるもの」。
+ * ただし renderable 間で共通の情報は個別には持たず、 ResolvedSizeOptions 側に持つ。
+ */
+export type Renderable = GlyphRenderable | ImageRenderable;
+
+/**
+ * 文字コード (キー) から renderable を引くテーブル
+ */
+export type RenderableTable = Record<string, Renderable>;
+export type GlyphRenderableTable = Record<string, GlyphRenderable>;
+
+export interface GlyphRenderable {
 	glyph: opentype.Glyph;
 	width: number;
 }
 
-export interface ImageGlyph {
+export interface ImageRenderable {
 	width: number;
 	image: Image;
 }
 
 export interface GlyphLocationMap {
-	[key: number]: GlyphLocation;
+	[key: string]: GlyphLocation;
 }
 
 export interface GlyphLocation {
@@ -90,11 +106,4 @@ export interface GlyphLocation {
 	y: number;
 	width: number;
 	height: number;
-}
-
-/**
- * キーのunicodeに対して、対応する文字列またはCanvas、またはGlyphを紐づけるテーブル
- */
-export interface GlyphSourceTable<T> {
-	[key: string]: T;
 }

@@ -5,8 +5,8 @@ import * as path from "path";
 import * as canvas from "canvas";
 import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
-import { generateBitmap } from "./generateBitmap";
-import type { BmpfontGeneratorCliConfig, FontRenderingOptions, GlyphSourceTable, SizeOptions } from "./type";
+import { generateBitmapFont } from "./generateBitmap";
+import type { BitmapFontEntryTable, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
 
 export async function run(argv: string[]): Promise<void> {
 	const config = parseArguments(argv);
@@ -32,13 +32,13 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	};
 
 	const chars: string[] = param.chars.split("");
-	const sourceTable: GlyphSourceTable<string | canvas.Image> = chars.reduce((table, ch) => {
+	const entryTable: BitmapFontEntryTable = chars.reduce((table, ch) => {
 		table[ch.charCodeAt(0)] = ch;
 		return table;
-	}, {} as GlyphSourceTable<string | canvas.Image>);
-	sourceTable["missingGlyph"] = param.missingGlyph ?? "";
-	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmap(sourceTable, fontOptions, sizeOptions);
-	const missingGlyph = map["missingGlyph" as any];
+	}, {} as BitmapFontEntryTable);
+	entryTable["missingGlyph"] = param.missingGlyph ?? "";
+	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmapFont(entryTable, fontOptions, sizeOptions);
+	const missingGlyph = map["missingGlyph"];
 
 	if (lostChars.length > 0) {
 		console.log(
@@ -73,13 +73,16 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
             return;
 		}
 
-		const pngQuanter: any = new PngQuant([`--quality=${quality}`, "256"]);
+		const pngQuanter = new PngQuant([`--quality=${quality}`, "256"]);
 		const chunks: Buffer[] = [];
 		pngQuanter
 			.on("data", (chunk: Buffer) => chunks.push(chunk))
 			.on("end", () => resolve(Buffer.concat(chunks)))
 			.on("error", (e: Error) => reject(e ?? "error at pngquant"));
-		cvs.createPNGStream().pipe(pngQuanter);
+		// TODO: キャストせず渡せる方法を検討する。
+		// write() メンバ関数の型が合わないため、暫定対応としてキャストして渡している。
+		cvs.createPNGStream().pipe(pngQuanter as any as NodeJS.WritableStream);
+
 	});
 }
 
