@@ -36,9 +36,9 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 		table[ch.charCodeAt(0)] = ch;
 		return table;
 	}, {} as BitmapFontEntryTable);
-	entryTable["missingGlyph"] = param.missingGlyph ?? "";
+	entryTable.missingGlyph = param.missingGlyph ?? "";
 	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmapFont(entryTable, fontOptions, sizeOptions);
-	const missingGlyph = map["missingGlyph"];
+	const missingGlyph = map.missingGlyph;
 
 	if (lostChars.length > 0) {
 		console.log(
@@ -70,7 +70,7 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
 				if (error) return reject(error);
 				resolve(result);
 			});
-            return;
+			return;
 		}
 
 		const pngQuanter = new PngQuant([`--quality=${quality}`, "256"]);
