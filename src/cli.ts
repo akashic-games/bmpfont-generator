@@ -7,7 +7,7 @@ import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmapFont } from "./generateBitmap";
 import type { BitmapFontEntryTable, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
-
+process.argv
 export async function run(argv: string[]): Promise<void> {
 	const config = parseArguments(argv);
 	return app(config);
@@ -38,7 +38,6 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	}, {} as BitmapFontEntryTable);
 	entryTable.missingGlyph = param.missingGlyph ?? "";
 	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmapFont(entryTable, fontOptions, sizeOptions);
-	const missingGlyph = map.missingGlyph;
 
 	if (lostChars.length > 0) {
 		console.log(
@@ -53,7 +52,7 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 			param.json,
 			JSON.stringify({
 				map,
-				missingGlyph,
+				missingGlyph: map.missingGlyph,
 				width: resolvedSizeOptions.fixedWidth,
 				height: resolvedSizeOptions.lineHeight
 			})
@@ -90,7 +89,7 @@ const defaultChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUV
 
 function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 	const { values, positionals } = parseArgs({
-		args: argv,
+		args: argv.slice(2), // parseArgs はデフォルト挙動では execPath filename を除外した process.argv を要求するため
 		allowPositionals: true,
 		options: {
 			help: { type: "boolean", short: "h" },
@@ -117,11 +116,13 @@ function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 		process.exit(0);
 	}
 
-	if (positionals.length < 4) {
+	if (positionals.length < 2) {
 		console.log("Missing arguments. See help.");
 	}
 
-	fs.accessSync(positionals[2]);
+	const [source, output] = positionals;
+
+	fs.accessSync(source);
 
 	let chars = values.chars;
 	if (values["chars-file"]) {
@@ -137,8 +138,8 @@ function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 	}
 
 	return {
-		source: positionals[2],
-		output: positionals[3],
+		source,
+		output,
 		fixedWidth: values["fixed-width"] ? Number.parseInt(values["fixed-width"], 10) : undefined,
 		height: Number.parseInt(values.height, 10),
 		chars,
@@ -149,7 +150,7 @@ function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 		baseine: values.baseline ? Number.parseInt(values.baseline, 10) : undefined,
 		quality: values.quality ? Number.parseInt(values.quality, 10) : undefined,
 		noAntiAlias: values["no-anti-alias"],
-		json: values.json ?? path.join(path.dirname(positionals[3]), path.parse(positionals[3]).name + "_glyphs.json"),
+		json: values.json ?? path.join(path.dirname(output), path.parse(output).name + "_glyphs.json"),
 		margin: Number.parseInt(values.margin, 10)
 	} satisfies BmpfontGeneratorCliConfig;
 }

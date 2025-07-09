@@ -11,45 +11,30 @@ import type {
 	RenderableTable,
 	ImageBitmapFontEntryTable,
 	GlyphRenderableTable,
+	GenerateBitmapFontResult,
 } from "./type";
 
 export function generateBitmapFont(
 	entryTable: BitmapFontEntryTable,
 	fontOptions: FontRenderingOptions,
 	sizeOptions: SizeOptions
-): Promise<{
-		canvas: canvas.Canvas;
-		map: GlyphLocationMap;
-		lostChars: string[];
-		resolvedSizeOptions: ResolvedSizeOptions;
-	}> {
+): GenerateBitmapFontResult {
 	const { glyphRenderableTable, lostChars, imageEntryTable } = collectGlyphRenderables(entryTable, fontOptions.font, sizeOptions);
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, fontOptions.font);
 
-	let renderableTable: RenderableTable;
-	if (Object.keys(imageEntryTable).length > 0) {
-		renderableTable = createAndInsertImageRenderableTable(glyphRenderableTable, imageEntryTable, resolvedSizeOptions);
-	} else {
-		renderableTable = glyphRenderableTable;
-	}
-	const renderableList: Renderable[] = Object.values(renderableTable);
-	const canvasSize = calculateCanvasSize(
-		renderableList,
-		resolvedSizeOptions.fixedWidth,
-		resolvedSizeOptions.lineHeight,
-		resolvedSizeOptions.margin
-	);
+	const renderableTable = createAndInsertImageRenderableTable(glyphRenderableTable, imageEntryTable, resolvedSizeOptions);
+	const canvasSize = calculateCanvasSize(renderableTable, resolvedSizeOptions);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
 	if (!fontOptions.antialias) ctx.antialias = "none";
 
 	const map = draw(ctx, renderableTable, resolvedSizeOptions, fontOptions);
-	return Promise.resolve({
+	return {
 		lostChars,
 		resolvedSizeOptions,
 		canvas: cvs,
 		map
-	});
+	};
 }
 
 function draw(
@@ -169,40 +154,47 @@ function resolveSizeOptions(
 }
 
 function calculateCanvasSize(
-	renderableList: Renderable[], charWidth: number | undefined, lineHeight: number, margin: number): {width: number; height: number} {
-	const width = charWidth ?? renderableList.reduce((acc, g) => acc + g.width + margin, 0) / renderableList.length;
+	renderableTable: RenderableTable,
+	options: ResolvedSizeOptions
+): {
+	width: number;
+	height: number;
+} {
+	const renderableList: Renderable[] = Object.values(renderableTable);
+	const width = options.fixedWidth ?? renderableList.reduce((acc, g) => acc + g.width + options.margin, 0) / renderableList.length;
 
-	if (width <= 0 || lineHeight <= 0) return {width: -1, height: -1};
+	if (width <= 0 || options.lineHeight <= 0) throw new Error("invalid width/height param requested.");
 
 	const glyphCount = renderableList.length + 1;
 	const MULTIPLE_OF_CANVAS_HEIGHT = 4;
 
 	let canvasSquareSideSize = 1;
 
-	const advanceWidth = width + margin;
-	const advanceHeight = lineHeight + margin;
+	const advanceWidth = width + options.margin;
+	const advanceHeight = options.lineHeight + options.margin;
 
 	// 文字が入りきる正方形の辺の長さを求める
 	for (; (canvasSquareSideSize / advanceWidth) * (canvasSquareSideSize / advanceHeight) < glyphCount; canvasSquareSideSize *= 2);
 	const canvasWidth = canvasSquareSideSize;
-	// 正方形じゃない場合があるのでcanvasSquareSideSizeは使えない
-	const tmpCanvasHeight = Math.ceil(glyphCount / Math.floor(canvasWidth / advanceWidth)) * advanceHeight;
-	const canvasHeight = Math.ceil(tmpCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 
-	let height = canvasHeight;
-	// widthAverageから導出した場合、サイズが不足する場合があるためGlyphを並べた際に必要なheightを導出する
-	if (!charWidth) {
-		let drawX = margin;
-		let drawY = margin + lineHeight;
-
-		renderableList.forEach((g: Renderable) => {
-			if (drawX + g.width + margin >= canvasWidth) {
-				drawX = margin;
-				drawY += lineHeight + margin;
-			}
-			drawX += g.width + margin;
-		});
-		height = drawY;
+	// 固定幅の場合: 幅が決まれば高さも単純に計算できる
+	if (options.fixedWidth) {
+		const rawCanvasHeight = Math.ceil(glyphCount / Math.floor(canvasWidth / advanceWidth)) * advanceHeight;
+		const ceiledCanvasHeight  = Math.ceil(rawCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
+		return { width : canvasSquareSideSize, height: ceiledCanvasHeight };
 	}
-	return {width: canvasWidth, height};
+
+	// 固定幅の場合: 幅が決まれば高さも単純に計算できる
+	let drawX = options.margin;
+	let drawY = options.margin + options.lineHeight;
+
+	renderableList.forEach((g: Renderable) => {
+		if (drawX + g.width + options.margin >= canvasWidth) {
+			drawX = options.margin;
+			drawY += options.lineHeight + options.margin;
+		}
+		drawX += g.width + options.margin;
+	});
+	drawY += options.margin;
+	return { width: canvasWidth, height: drawY };
 }

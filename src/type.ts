@@ -1,4 +1,4 @@
-import type { Image } from "canvas";
+import type { Image, Canvas } from "canvas";
 
 export interface BmpfontGeneratorCliConfig {
 	source: string;
@@ -106,4 +106,11 @@ export interface GlyphLocation {
 	y: number;
 	width: number;
 	height: number;
+}
+
+export interface GenerateBitmapFontResult {
+	canvas: Canvas;
+	map: GlyphLocationMap;
+	lostChars: string[];
+	resolvedSizeOptions: ResolvedSizeOptions;
 }
