@@ -7,7 +7,7 @@ import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmapFont } from "./generateBitmap";
 import type { BitmapFontEntryTable, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
-process.argv
+
 export async function run(argv: string[]): Promise<void> {
 	const config = parseArguments(argv);
 	return app(config);
@@ -89,7 +89,7 @@ const defaultChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUV
 
 function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 	const { values, positionals } = parseArgs({
-		args: argv.slice(2), // parseArgs はデフォルト挙動では execPath filename を除外した process.argv を要求するため
+		args: argv.slice(2), // デフォルト値は先頭 2 要素を削った process.argv なので、それに合わせて slice() して渡す
 		allowPositionals: true,
 		options: {
 			help: { type: "boolean", short: "h" },
@@ -122,6 +122,7 @@ function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 
 	const [source, output] = positionals;
 
+	// ファイルが存在しない場合、 opentype に渡す前にエラーを出す
 	fs.accessSync(source);
 
 	let chars = values.chars;

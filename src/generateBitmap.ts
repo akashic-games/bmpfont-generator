@@ -12,6 +12,7 @@ import type {
 	ImageBitmapFontEntryTable,
 	GlyphRenderableTable,
 	GenerateBitmapFontResult,
+	CanvasSize,
 } from "./type";
 
 export function generateBitmapFont(
@@ -156,35 +157,30 @@ function resolveSizeOptions(
 function calculateCanvasSize(
 	renderableTable: RenderableTable,
 	options: ResolvedSizeOptions
-): {
-	width: number;
-	height: number;
-} {
+): CanvasSize {
 	const renderableList: Renderable[] = Object.values(renderableTable);
-	const width = options.fixedWidth ?? renderableList.reduce((acc, g) => acc + g.width + options.margin, 0) / renderableList.length;
-
-	if (width <= 0 || options.lineHeight <= 0) throw new Error("invalid width/height param requested.");
-
-	const glyphCount = renderableList.length + 1;
+	const averageWidth = options.fixedWidth ?? renderableList.reduce((acc, g) => acc + g.width + options.margin, 0) / renderableList.length;
+	const glyphCount = renderableList.length;
 	const MULTIPLE_OF_CANVAS_HEIGHT = 4;
 
 	let canvasSquareSideSize = 1;
 
-	const advanceWidth = width + options.margin;
+	const averageAdvanceWidth = averageWidth + options.margin;
 	const advanceHeight = options.lineHeight + options.margin;
 
-	// 文字が入りきる正方形の辺の長さを求める
-	for (; (canvasSquareSideSize / advanceWidth) * (canvasSquareSideSize / advanceHeight) < glyphCount; canvasSquareSideSize *= 2);
+	// 平均の幅から、大まかに文字が入り切る正方形の辺の長さを求める
+ 	while ((canvasSquareSideSize / averageAdvanceWidth) * (canvasSquareSideSize / advanceHeight) < glyphCount) {
+		canvasSquareSideSize *= 2;
+	}
 	const canvasWidth = canvasSquareSideSize;
 
 	// 固定幅の場合: 幅が決まれば高さも単純に計算できる
 	if (options.fixedWidth) {
-		const rawCanvasHeight = Math.ceil(glyphCount / Math.floor(canvasWidth / advanceWidth)) * advanceHeight;
+		const rawCanvasHeight = Math.ceil(glyphCount / Math.floor(canvasWidth / averageAdvanceWidth)) * advanceHeight;
 		const ceiledCanvasHeight  = Math.ceil(rawCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 		return { width : canvasSquareSideSize, height: ceiledCanvasHeight };
 	}
 
-	// 固定幅の場合: 幅が決まれば高さも単純に計算できる
 	let drawX = options.margin;
 	let drawY = options.margin + options.lineHeight;
 

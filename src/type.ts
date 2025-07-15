@@ -114,3 +114,8 @@ export interface GenerateBitmapFontResult {
 	lostChars: string[];
 	resolvedSizeOptions: ResolvedSizeOptions;
 }
+
+export interface CanvasSize {
+	width: number;
+	height: number;
+}
