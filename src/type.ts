@@ -87,12 +87,15 @@ export type Renderable = GlyphRenderable | ImageRenderable;
 export type RenderableTable = Record<string, Renderable>;
 export type GlyphRenderableTable = Record<string, GlyphRenderable>;
 
-export interface GlyphRenderable {
-	glyph: opentype.Glyph;
+export interface RenderableBase {
 	width: number;
 }
 
-export interface ImageRenderable {
+export interface GlyphRenderable extends RenderableBase {
+	glyph: opentype.Glyph;
+}
+
+export interface ImageRenderable extends RenderableBase {
 	width: number;
 	image: Image;
 }
