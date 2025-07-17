@@ -63,7 +63,7 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 }
 
 async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
-	return new Promise<Buffer>(async (resolve, reject) => {
+	return new Promise<Buffer>((resolve, reject) => {
 		if (!quality) {
 			cvs.toBuffer((error: any, result: Buffer) => {
 				if (error) return reject(error);
