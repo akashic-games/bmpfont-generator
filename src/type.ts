@@ -1,4 +1,4 @@
-import * as canvas from "@napi-rs/canvas";
+import { Image, Canvas } from "@napi-rs/canvas";
 
 export interface BmpfontGeneratorCliConfig {
 	source: string;
@@ -6,8 +6,7 @@ export interface BmpfontGeneratorCliConfig {
 	fixedWidth?: number;
 	height: number;
 	chars: string;
-	missingGlyph?: string | canvas.Image;
-	missingGlyphImage?: string;
+	missingGlyph?: string | Image;
 	fill: string;
 	stroke?: string;
 	strokeWidth: number;
@@ -18,21 +17,13 @@ export interface BmpfontGeneratorCliConfig {
 	margin: number;
 }
 
-
-export interface CalculateCanvasSizeOptions {
-	chars: string,
-	charWidth: number,
-	charHeight: number,
-	margin: number    
-}
-
 export interface FontRenderingOptions {
-	font: opentype.Font,
+	font: opentype.Font;
 	fillColor: string;
 	strokeColor?: string;
 	strokeWidth: number;
 	antialias: boolean;
-  }
+}
 
 export interface SizeOptions {
 
@@ -40,7 +31,7 @@ export interface SizeOptions {
 	 * ユーザが指定できる文字の横サイズ(px)
 	 * 指定した場合、グリフごとの幅に関わらずこの値を幅として扱う
 	 */
-	width?: number;
+	fixedWidth?: number;
 
 	/**
 	 * ユーザが指定できる文字の縦サイズ(px)。省略した場合、13。
@@ -59,9 +50,9 @@ export interface SizeOptions {
 	baselineHeight?: number;
 }
 
-export interface ResolvedSizeOption extends SizeOptions {
+export interface ResolvedSizeOptions extends SizeOptions {
 	baselineHeight: number;
-    /**
+	/**
 	 * フォントグリフを重ならず描画するために必要な高さ。
 	 * baseline(yMax) + desend(yMin)の絶対値の合計。
 	 */
@@ -74,28 +65,60 @@ export interface ResolvedSizeOption extends SizeOptions {
 	 * 旧adjustedHeight相当。
 	 */
 	lineHeight: number;
+
+	descend: number;
 }
 
-export type Glyph = CharGlyph | ImageGlyph;
+export type BitmapFontEntry = string | Image;
 
-export interface CharGlyph {
-    glyph: opentype.Glyph;
-    width: number;
+export type BitmapFontEntryTable = Record<string, BitmapFontEntry>;
+export type ImageBitmapFontEntryTable = Record<string, Image>;
+
+
+/**
+ * ビットマップフォント "画像" に「敷き詰めて」「描けるもの」。
+ * ただし renderable 間で共通の情報は個別には持たず、 ResolvedSizeOptions 側に持つ。
+ */
+export type Renderable = GlyphRenderable | ImageRenderable;
+
+/**
+ * 文字コード (キー) から renderable を引くテーブル
+ */
+export type RenderableTable = Record<string, Renderable>;
+export type GlyphRenderableTable = Record<string, GlyphRenderable>;
+
+export interface RenderableBase {
+	width: number;
 }
 
-export interface ImageGlyph {
-    width: number;
-    image: canvas.Image;
+export interface GlyphRenderable extends RenderableBase {
+	glyph: opentype.Glyph;
 }
 
-export interface BitmapDictionary {
-    [key: number]: BitmapDictionaryEelement;
+export interface ImageRenderable extends RenderableBase {
+	width: number;
+	image: Image;
 }
 
-export interface BitmapDictionaryEelement {
-    x: number;
-    y: number;
-    // 元が省略しうる定義のため後方互換を考慮してoptionalとしている
-    width?: number;
-    height?: number;
+export interface GlyphLocationMap {
+	[key: string]: GlyphLocation;
+}
+
+export interface GlyphLocation {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+
+export interface GenerateBitmapFontResult {
+	canvas: Canvas;
+	map: GlyphLocationMap;
+	lostChars: string[];
+	resolvedSizeOptions: ResolvedSizeOptions;
+}
+
+export interface CanvasSize {
+	width: number;
+	height: number;
 }
