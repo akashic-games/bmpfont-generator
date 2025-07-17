@@ -122,7 +122,7 @@ function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 
 	const [source, output] = positionals;
 
-	// ファイルが存在しない場合、 opentype に渡す前にエラーを出す
+	// ファイルが存在しない場合、 opentype に渡す前に自前で確認してエラーを出す
 	fs.accessSync(source);
 
 	let chars = values.chars;
