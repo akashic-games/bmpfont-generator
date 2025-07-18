@@ -1,4 +1,4 @@
-import { Image, Canvas } from "@napi-rs/canvas";
+import type { Image, Canvas } from "@napi-rs/canvas";
 
 export interface BmpfontGeneratorCliConfig {
 	source: string;
