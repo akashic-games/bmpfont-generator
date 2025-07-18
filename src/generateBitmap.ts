@@ -28,7 +28,8 @@ export function generateBitmapFont(
 	const canvasSize = calculateCanvasSize(Object.values(renderableTable), resolvedSizeOptions);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
-	if (!fontOptions.antialias) ctx.antialias = "none";
+	// TODO: 別途対応するまで暫定的にコメントアウト
+	// if (!fontOptions.antialias) ctx.antialias = "none";
 
 	const map = draw(ctx, renderableTable, resolvedSizeOptions, fontOptions);
 	return {
@@ -40,7 +41,7 @@ export function generateBitmapFont(
 }
 
 function draw(
-	ctx: canvas.CanvasRenderingContext2D,
+	ctx: canvas.SKRSContext2D,
 	renderableTable: RenderableTable,
 	resolvedSizeOption: ResolvedSizeOptions,
 	fontOptions: FontRenderingOptions
