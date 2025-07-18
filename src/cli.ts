@@ -7,6 +7,7 @@ import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmapFont } from "./generateBitmap";
 import type { BitmapFontEntryTable, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
+import { Readable } from 'node:stream';
 
 export async function run(argv: string[]): Promise<void> {
 	const config = parseArguments(argv);
@@ -70,6 +71,7 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
 			} catch (error: any) {
 				reject(error);
 			}
+			return;
 		}
 
 		const pngQuanter = new PngQuant([`--quality=${quality}`, "256"]);
@@ -80,7 +82,7 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
 			.on("error", (e: Error) => reject(e ?? "error at pngquant"));
 		// TODO: キャストせず渡せる方法を検討する。
 		// write() メンバ関数の型が合わないため、暫定対応としてキャストして渡している。
-		await cvs.encodeStream("png").pipeTo(pngQuanter as any);
+		Readable.from(cvs.encodeSync("png")).pipe(pngQuanter as any);
 	});
 }
 
