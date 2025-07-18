@@ -9,7 +9,6 @@
     "strict": true
   },
   "files": [
-    "./node_modules/canvas/types/index.d.ts",
     "./src/cli.ts"
   ]
 }

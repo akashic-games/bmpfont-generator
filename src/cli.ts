@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import * as path from "path";
-import * as canvas from "canvas";
+import * as canvas from "@napi-rs/canvas";
 import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmapFont } from "./generateBitmap";
@@ -63,13 +63,13 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 }
 
 async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
-	return new Promise<Buffer>(async (resolve, reject) => {
+	return new Promise<Buffer>((resolve, reject) => {
 		if (!quality) {
-			cvs.toBuffer((error: any, result: Buffer) => {
-				if (error) return reject(error);
-				resolve(result);
-			});
-			return;
+			try {
+				resolve(cvs.toBuffer("image/png"));
+			} catch (error: any) {
+				reject(error);
+			}
 		}
 
 		const pngQuanter = new PngQuant([`--quality=${quality}`, "256"]);
@@ -80,8 +80,7 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
 			.on("error", (e: Error) => reject(e ?? "error at pngquant"));
 		// TODO: キャストせず渡せる方法を検討する。
 		// write() メンバ関数の型が合わないため、暫定対応としてキャストして渡している。
-		cvs.createPNGStream().pipe(pngQuanter as any as NodeJS.WritableStream);
-
+		cvs.encodeStream("png").pipeTo(pngQuanter as any);
 	});
 }
 
@@ -122,7 +121,7 @@ function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 
 	const [source, output] = positionals;
 
-	// ファイルが存在しない場合、 opentype に渡す前にエラーを出す
+	// ファイルが存在しない場合、 opentype に渡す前に自前で確認してエラーを出す
 	fs.accessSync(source);
 
 	let chars = values.chars;

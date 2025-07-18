@@ -1,4 +1,4 @@
-import * as canvas from "canvas";
+import * as canvas from "@napi-rs/canvas";
 import type {
 	FontRenderingOptions,
 	SizeOptions,
@@ -13,6 +13,7 @@ import type {
 	GlyphRenderableTable,
 	GenerateBitmapFontResult,
 	CanvasSize,
+	RenderableBase,
 } from "./type";
 
 export function generateBitmapFont(
@@ -24,10 +25,11 @@ export function generateBitmapFont(
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, fontOptions.font);
 
 	const renderableTable = createAndInsertImageRenderableTable(glyphRenderableTable, imageEntryTable, resolvedSizeOptions);
-	const canvasSize = calculateCanvasSize(renderableTable, resolvedSizeOptions);
+	const canvasSize = calculateCanvasSize(Object.values(renderableTable), resolvedSizeOptions);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
-	if (!fontOptions.antialias) ctx.antialias = "none";
+	// TODO: 別途対応するまで暫定的にコメントアウト
+	// if (!fontOptions.antialias) ctx.antialias = "none";
 
 	const map = draw(ctx, renderableTable, resolvedSizeOptions, fontOptions);
 	return {
@@ -39,7 +41,7 @@ export function generateBitmapFont(
 }
 
 function draw(
-	ctx: canvas.CanvasRenderingContext2D,
+	ctx: canvas.SKRSContext2D,
 	renderableTable: RenderableTable,
 	resolvedSizeOption: ResolvedSizeOptions,
 	fontOptions: FontRenderingOptions
@@ -83,7 +85,7 @@ function isImageGlyph(glyph: Renderable): glyph is ImageRenderable {
 	return !!(glyph as any).image;
 }
 
-function collectGlyphRenderables(
+export function collectGlyphRenderables(
 	entryTable: BitmapFontEntryTable,
 	font: opentype.Font,
 	sizeOptions: SizeOptions
@@ -127,8 +129,10 @@ function createAndInsertImageRenderableTable(
 	return renderableTable;
 }
 
-function resolveSizeOptions(
-	glyphRenderableTable: GlyphRenderableTable, sizeOptions: SizeOptions, font: opentype.Font): ResolvedSizeOptions {
+export function resolveSizeOptions(
+	glyphRenderableTable: GlyphRenderableTable,
+	sizeOptions: SizeOptions,
+	font: opentype.Font): ResolvedSizeOptions {
 	if (Object.keys(glyphRenderableTable).length === 0) throw new Error("List has no Glyph");
 	const metrics = Object.values(glyphRenderableTable).reduce<{descend: number; baseline: number}>((prev, g: GlyphRenderable) => {
 		const scale = 1 / (g.glyph.path.unitsPerEm ?? font.unitsPerEm) * sizeOptions.height;
@@ -154,13 +158,12 @@ function resolveSizeOptions(
 	} as ResolvedSizeOptions;
 }
 
-function calculateCanvasSize(
-	renderableTable: RenderableTable,
+export function calculateCanvasSize(
+	widthList: RenderableBase[],
 	options: ResolvedSizeOptions
 ): CanvasSize {
-	const renderableList: Renderable[] = Object.values(renderableTable);
-	const averageWidth = options.fixedWidth ?? renderableList.reduce((acc, g) => acc + g.width + options.margin, 0) / renderableList.length;
-	const glyphCount = renderableList.length;
+	const averageWidth = options.fixedWidth ?? widthList.reduce((acc, g) => acc + g.width + options.margin, 0) / widthList.length;
+	const glyphCount = widthList.length;
 	const MULTIPLE_OF_CANVAS_HEIGHT = 4;
 
 	let canvasSquareSideSize = 1;
@@ -169,7 +172,7 @@ function calculateCanvasSize(
 	const advanceHeight = options.lineHeight + options.margin;
 
 	// 平均の幅から、大まかに文字が入り切る正方形の辺の長さを求める
- 	while ((canvasSquareSideSize / averageAdvanceWidth) * (canvasSquareSideSize / advanceHeight) < glyphCount) {
+	while ((canvasSquareSideSize / averageAdvanceWidth) * (canvasSquareSideSize / advanceHeight) < glyphCount) {
 		canvasSquareSideSize *= 2;
 	}
 	const canvasWidth = canvasSquareSideSize;
@@ -184,7 +187,7 @@ function calculateCanvasSize(
 	let drawX = options.margin;
 	let drawY = options.margin + options.lineHeight;
 
-	renderableList.forEach((g: Renderable) => {
+	widthList.forEach((g: RenderableBase) => {
 		if (drawX + g.width + options.margin >= canvasWidth) {
 			drawX = options.margin;
 			drawY += options.lineHeight + options.margin;
