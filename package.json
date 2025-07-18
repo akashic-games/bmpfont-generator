@@ -31,7 +31,7 @@
   "author": "DWANGO Co., Ltd.",
   "license": "MIT",
   "dependencies": {
-    "canvas": "^2.6.1",
+    "@napi-rs/canvas": "^0.1.70",
     "commander": "^4.1.0",
     "opentype.js": "1.3.4",
     "pngquant": "^4.2.0"

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import * as path from "path";
-import * as canvas from "canvas";
+import * as canvas from "@napi-rs/canvas";
 import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmapFont } from "./generateBitmap";

@@ -1,4 +1,4 @@
-import * as canvas from "canvas";
+import * as canvas from "@napi-rs/canvas";
 import type {
 	FontRenderingOptions,
 	SizeOptions,
