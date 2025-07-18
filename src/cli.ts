@@ -63,7 +63,7 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 }
 
 async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
-	return new Promise<Buffer>((resolve, reject) => {
+	return new Promise<Buffer>(async (resolve, reject) => {
 		if (!quality) {
 			try {
 				resolve(cvs.toBuffer("image/png"));
@@ -80,7 +80,7 @@ async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
 			.on("error", (e: Error) => reject(e ?? "error at pngquant"));
 		// TODO: キャストせず渡せる方法を検討する。
 		// write() メンバ関数の型が合わないため、暫定対応としてキャストして渡している。
-		cvs.encodeStream("png").pipeTo(pngQuanter as any);
+		await cvs.encodeStream("png").pipeTo(pngQuanter as any);
 	});
 }
 
