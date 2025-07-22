@@ -25,7 +25,7 @@ export function generateBitmapFont(
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, fontOptions.font);
 
 	const renderableTable = createAndInsertImageRenderableTable(glyphRenderableTable, imageEntryTable, resolvedSizeOptions);
-	const canvasSize = calculateCanvasSize(Object.values(renderableTable), resolvedSizeOptions);
+	const canvasSize = calculateCanvasSize(renderableTable, resolvedSizeOptions);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
 	// TODO: 別途対応するまで暫定的にコメントアウト
@@ -159,9 +159,10 @@ export function resolveSizeOptions(
 }
 
 export function calculateCanvasSize(
-	widthList: RenderableBase[],
+	renderableTable: Record<string, RenderableBase>, // RenderableTable を受け取る想定だがテストしやすいよう必要な要素のみ指定
 	options: ResolvedSizeOptions
 ): CanvasSize {
+	const widthList = Object.values(renderableTable;)
 	const averageWidth = options.fixedWidth ?? widthList.reduce((acc, g) => acc + g.width + options.margin, 0) / widthList.length;
 	const glyphCount = widthList.length;
 	const MULTIPLE_OF_CANVAS_HEIGHT = 4;
