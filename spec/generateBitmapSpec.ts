@@ -4,6 +4,19 @@ import * as path from "path";
 import { calculateCanvasSize, collectGlyphRenderables, resolveSizeOptions } from "../lib/generateBitmap";
 import type { BitmapFontEntryTable, GlyphRenderable, GlyphRenderableTable, RenderableTable, ResolvedSizeOptions, SizeOptions } from "../src/type";
 
+let font: opentype.Font;
+
+async function generateTestParts(sizeOptions: SizeOptions, chars: string) {
+	font = await opentype.load(path.join(__dirname, "./fixtures/mplus-1c-light.ttf"));
+	const entryTable = Array.from(chars).reduce((table, ch) => {
+		table[ch.charCodeAt(0)] = ch;
+		return table;
+	}, { missingGlyph: "" } as BitmapFontEntryTable);
+
+	const { glyphRenderableTable } = collectGlyphRenderables(entryTable, font, sizeOptions);
+	return { glyphRenderableTable, font , entryTable};
+}
+
 describe("calculateCanvasSize", function () {
 	const resolvedSizeOptions = {
 		fixedWidth: undefined,
@@ -52,30 +65,71 @@ describe("calculateCanvasSize", function () {
 	});
 })
 
-let font: opentype.Font;
-
-
+describe("collectGlyphRenderables", async function () {
+	it("", async function() {
+		const sizeOptions = { height: 13, margin: 1, fixedWidth: undefined, baselineHeight: undefined };
+		const { entryTable } = await generateTestParts(sizeOptions, "abcdefgh");
+		// entryTable["missingGlyph"] = image;
+		const { glyphRenderableTable, imageEntryTable, lostChars } = collectGlyphRenderables(entryTable, font, sizeOptions);
+		expect(Object.keys(glyphRenderableTable)).toEqual(["a", "b", "c", "d", "e", "f", "g", "h"]);
+	})
+});
 
 describe("resolveSizeOptions",function () {
-	it("", async function() {
-		font = await opentype.load(path.join(__dirname, "./fixtures/mplus-1c-light.ttf"));
-		const abcdefghWdith = "abcdefghWdith";
-		const entryTable = Array.from(abcdefghWdith).reduce((table, ch) => {
-			table[ch.charCodeAt(0)] = ch;
-			return table;
-		}, {} as BitmapFontEntryTable);
-
-		const glyphRenderableTable = collectGlyphRenderables(entryTable, font, { height: 13, margin: 1 } satisfies SizeOptions);
-		const resizedSizeOptions = resolveSizeOptions(glyphRenderableTable, {}, font);
-
+	it("no fixed", async function() {
+		const sizeOptions = { height: 13, margin: 1, fixedWidth: undefined, baselineHeight: undefined };
+		const { glyphRenderableTable, font } = await generateTestParts(sizeOptions, "abcdefgh");
+		const resizedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, font);
 		expect(resizedSizeOptions).toEqual({
-		fixedWidth: undefined,
-		height: 13,
-		baselineHeight: 9.75,
-		margin: 1,
-		requiredHeight: 9.62,
-		lineHeight: 13,
-		descend: -0.13
-	});
+			fixedWidth: undefined,
+			height: 13,
+			baselineHeight: 9.75,
+			margin: 1,
+			requiredHeight: 6.76,
+			lineHeight: 13,
+			descend: -2.99
+		});
+	})
+	it("fixed", async function() {
+		const sizeOptions = { height: 13, margin: 1, fixedWidth: 5, baselineHeight: undefined };
+		const { glyphRenderableTable, font } = await generateTestParts(sizeOptions, "abcdefgh");
+		const resizedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, font);
+		expect(resizedSizeOptions).toEqual({
+			fixedWidth: 5,
+			height: 13,
+			baselineHeight: 9.75,
+			margin: 1,
+			requiredHeight: 6.76,
+			lineHeight: 13,
+			descend: -2.99
+		});
+	})
+	it("baseline height", async function() {
+		const sizeOptions = { height: 13, margin: 1, fixedWidth: undefined, baselineHeight: 16 };
+		const { glyphRenderableTable, font } = await generateTestParts(sizeOptions, "abcdefgh");
+		const resizedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, font);
+		expect(resizedSizeOptions).toEqual({
+			fixedWidth: undefined,
+			height: 13,
+			baselineHeight: 9.75,
+			margin: 1,
+			requiredHeight: 6.76,
+			lineHeight: 13,
+			descend: -2.99
+		});
+	})
+	it("margin", async function() {
+		const sizeOptions = { height: 13, margin: 3, fixedWidth: undefined, baselineHeight: undefined };
+		const { glyphRenderableTable, font } = await generateFontAndRenderableTable(sizeOptions, "abcdefgh");
+		const resizedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, font);
+		expect(resizedSizeOptions).toEqual({
+			fixedWidth: undefined,
+			height: 13,
+			baselineHeight: 9.75,
+			margin: 3,
+			requiredHeight: 6.76,
+			lineHeight: 13,
+			descend: -2.99
+		});
 	})
 });

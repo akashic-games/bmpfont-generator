@@ -6,7 +6,8 @@
     "noImplicitAny": true,
     "module": "commonjs",
     "outDir": "./lib",
-    "strict": true
+    "strict": true,
+    "esModuleInterop": true,
   },
   "files": [
     "./src/cli.ts"
