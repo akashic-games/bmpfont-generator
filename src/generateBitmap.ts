@@ -14,6 +14,7 @@ import type {
 	GenerateBitmapFontResult,
 	CanvasSize,
 	RenderableBase,
+	CollectGlyphRenderablesResult,
 } from "./type";
 
 export function generateBitmapFont(
@@ -51,18 +52,18 @@ function draw(
 	const map: GlyphLocationMap = {};
 
 	Object.keys(renderableTable).forEach(key => {
-		const glyph = renderableTable[key];
-		const width = resolvedSizeOption.fixedWidth ?? glyph.width + resolvedSizeOption.margin;
+		const renderable = renderableTable[key];
+		const width = resolvedSizeOption.fixedWidth ?? renderable.width + resolvedSizeOption.margin;
 		if (drawX + width > ctx.canvas.width) {
 			drawX = resolvedSizeOption.margin;
 			drawY += resolvedSizeOption.lineHeight + resolvedSizeOption.margin;
 		}
 
-		if (isImageGlyph(glyph)) {
-			ctx.drawImage(glyph.image, drawX, drawY, glyph.width, resolvedSizeOption.lineHeight);
+		if (isImageRenderable(renderable)) {
+			ctx.drawImage(renderable.image, drawX, drawY, renderable.width, resolvedSizeOption.lineHeight);
 		} else {
-			const path = glyph.glyph.getPath(
-				drawX + (width / 2) - (glyph.width / 2), drawY + resolvedSizeOption.baselineHeight, resolvedSizeOption.height);
+			const path = renderable.glyph.getPath(
+				drawX + (width / 2) - (renderable.width / 2), drawY + resolvedSizeOption.baselineHeight, resolvedSizeOption.height);
 			path.fill = fontOptions.fillColor;
 			path.stroke = fontOptions.strokeColor || null;
 			path.strokeWidth = fontOptions.strokeWidth;
@@ -70,7 +71,7 @@ function draw(
 
 			// NOTE: そのフォントにおけるグリフが対応するunicodesがkeyの値以外にも存在する可能性がある。
 			// 過去のビットマップフォントとの互換性も考慮し、unicodesもmapに含める。
-			glyph.glyph.unicodes.forEach(unicode => {
+			renderable.glyph.unicodes.forEach(unicode => {
 				map[unicode] = {x: drawX, y: drawY, width, height: resolvedSizeOption.lineHeight};
 			});
 		}
@@ -81,32 +82,28 @@ function draw(
 	return map;
 }
 
-function isImageGlyph(glyph: Renderable): glyph is ImageRenderable {
-	return !!(glyph as any).image;
+function isImageRenderable(renderable: Renderable): renderable is ImageRenderable {
+	return !!(renderable as any).image;
 }
 
 export function collectGlyphRenderables(
 	entryTable: BitmapFontEntryTable,
 	font: opentype.Font,
 	sizeOptions: SizeOptions
-): {
-		glyphRenderableTable: GlyphRenderableTable;
-		lostChars: string[];
-		imageEntryTable: ImageBitmapFontEntryTable;
-	} {
+): CollectGlyphRenderablesResult {
 	const glyphRenderableTable: GlyphRenderableTable = {};
 	const lostChars: string[] = [];
 	const imageEntryTable: ImageBitmapFontEntryTable = {};
 	Object.keys(entryTable).forEach(key => {
-		const char = entryTable[key];
-		if (typeof char !== "string") {
-			imageEntryTable[key] = char;
+		const entry = entryTable[key];
+		if (typeof entry !== "string") {
+			imageEntryTable[key] = entry;
 			return;
 		};
 
-		const glyph = font.stringToGlyphs(char);
-		glyph.forEach((g) => {
-			if (g.unicodes.length === 0) lostChars.push(char);
+		const glyphs = font.stringToGlyphs(entry);
+		glyphs.forEach((g) => {
+			if (g.unicodes.length === 0) lostChars.push(entry);
 			const scale = 1 / (g.path.unitsPerEm ?? font.unitsPerEm) * sizeOptions.height;
 			glyphRenderableTable[key] = {glyph: g, width: Math.ceil((g.advanceWidth ?? 0) * scale)};
 		});
@@ -116,15 +113,15 @@ export function collectGlyphRenderables(
 
 function createAndInsertImageRenderableTable(
 	glyphRenderableTable: GlyphRenderableTable,
-	imageEntryTable:  ImageBitmapFontEntryTable,
+	imageEntryTable: ImageBitmapFontEntryTable,
 	resolvedSizeOptions: ResolvedSizeOptions
 ): RenderableTable {
-	const renderableTable: RenderableTable = glyphRenderableTable;
+	const renderableTable: RenderableTable = { ...glyphRenderableTable };
 	Object.keys(imageEntryTable).forEach(key => {
-		const img = imageEntryTable[key];
-		const mgScale = img.width / img.height;
-		const mgWidth = Math.ceil((resolvedSizeOptions.baselineHeight + resolvedSizeOptions.descend) * mgScale);
-		renderableTable[key] = { width: mgWidth, image: img } satisfies ImageRenderable;
+		const image = imageEntryTable[key];
+		const scale = image.width / image.height;
+		const width = Math.ceil((resolvedSizeOptions.baselineHeight + resolvedSizeOptions.descend) * scale);
+		renderableTable[key] = { width, image } satisfies ImageRenderable;
 	});
 	return renderableTable;
 }
@@ -132,8 +129,9 @@ function createAndInsertImageRenderableTable(
 export function resolveSizeOptions(
 	glyphRenderableTable: GlyphRenderableTable,
 	sizeOptions: SizeOptions,
-	font: opentype.Font): ResolvedSizeOptions {
-	if (Object.keys(glyphRenderableTable).length === 0) throw new Error("List has no Glyph");
+	font: opentype.Font
+): ResolvedSizeOptions {
+	if (Object.keys(glyphRenderableTable).length === 0) throw new Error("Unsupported: List has no Glyph");
 	const metrics = Object.values(glyphRenderableTable).reduce<{descend: number; baseline: number}>((prev, g: GlyphRenderable) => {
 		const scale = 1 / (g.glyph.path.unitsPerEm ?? font.unitsPerEm) * sizeOptions.height;
 		const metrics = g.glyph.getMetrics();
@@ -162,9 +160,9 @@ export function calculateCanvasSize(
 	renderableTable: Record<string, RenderableBase>, // RenderableTable を受け取る想定だがテストしやすいよう必要な要素のみ指定
 	options: ResolvedSizeOptions
 ): CanvasSize {
-	const widthList = Object.values(renderableTable;)
+	const widthList = Object.values(renderableTable);
 	const averageWidth = options.fixedWidth ?? widthList.reduce((acc, g) => acc + g.width + options.margin, 0) / widthList.length;
-	const glyphCount = widthList.length;
+	const renderablesCount = widthList.length;
 	const MULTIPLE_OF_CANVAS_HEIGHT = 4;
 
 	let canvasSquareSideSize = 1;
@@ -173,14 +171,14 @@ export function calculateCanvasSize(
 	const advanceHeight = options.lineHeight + options.margin;
 
 	// 平均の幅から、大まかに文字が入り切る正方形の辺の長さを求める
-	while ((canvasSquareSideSize / averageAdvanceWidth) * (canvasSquareSideSize / advanceHeight) < glyphCount) {
+	while ((canvasSquareSideSize / averageAdvanceWidth) * (canvasSquareSideSize / advanceHeight) < renderablesCount) {
 		canvasSquareSideSize *= 2;
 	}
 	const canvasWidth = canvasSquareSideSize;
 
 	// 固定幅の場合: 幅が決まれば高さも単純に計算できる
 	if (options.fixedWidth) {
-		const rawCanvasHeight = Math.ceil(glyphCount / Math.floor(canvasWidth / averageAdvanceWidth)) * advanceHeight;
+		const rawCanvasHeight = Math.ceil(renderablesCount / Math.floor(canvasWidth / averageAdvanceWidth)) * advanceHeight;
 		const ceiledCanvasHeight  = Math.ceil(rawCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 		return { width : canvasSquareSideSize, height: ceiledCanvasHeight };
 	}

@@ -6,7 +6,7 @@ import * as canvas from "@napi-rs/canvas";
 import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmapFont } from "./generateBitmap";
-import type { BitmapFontEntryTable, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
+import type { BitmapFontEntryTable, BitmapFontGlyphInfo, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
 import { Readable } from 'node:stream';
 
 export async function run(argv: string[]): Promise<void> {
@@ -37,7 +37,7 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 		table[ch.charCodeAt(0)] = ch;
 		return table;
 	}, {} as BitmapFontEntryTable);
-	entryTable.missingGlyph = param.missingGlyph ?? "";
+	entryTable.missingGlyph = param.missingGlyph ?? " ";
 	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmapFont(entryTable, fontOptions, sizeOptions);
 
 	if (lostChars.length > 0) {
@@ -49,14 +49,16 @@ async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	}
 
 	if (param.json) {
+		const missingGlyph = map.missingGlyph;
+		delete map.missingGlyph;
 		await writeFile(
 			param.json,
 			JSON.stringify({
 				map,
-				missingGlyph: map.missingGlyph,
+				missingGlyph,
 				width: resolvedSizeOptions.fixedWidth,
 				height: resolvedSizeOptions.lineHeight
-			})
+			} satisfies BitmapFontGlyphInfo)
 		);
 	}
 
