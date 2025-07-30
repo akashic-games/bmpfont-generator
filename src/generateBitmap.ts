@@ -132,7 +132,7 @@ export function resolveSizeOptions(
 	font: opentype.Font
 ): ResolvedSizeOptions {
 	if (Object.keys(glyphRenderableTable).length === 0) throw new Error("Unsupported: List has no Glyph");
-	const metrics = Object.values(glyphRenderableTable).reduce<{descend: number; baseline: number}>((prev, g: GlyphRenderable) => {
+	const metrics = Object.values(glyphRenderableTable).reduce((prev, g: GlyphRenderable) => {
 		const scale = 1 / (g.glyph.path.unitsPerEm ?? font.unitsPerEm) * sizeOptions.height;
 		const metrics = g.glyph.getMetrics();
 		const descend = metrics.yMin * scale;
