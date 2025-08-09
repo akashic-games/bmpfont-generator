@@ -14,7 +14,7 @@ export async function run(argv: string[]): Promise<void> {
 	return app(config);
 }
 
-async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
+export async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
 	const font = await opentype.load(param.source);
 
 	const fontOptions: FontRenderingOptions = {
