@@ -33,7 +33,7 @@ export function generateBitmapFont(
 	const ctx = cvs.getContext("2d");
 
 	const map = draw(ctx, renderableTable, resolvedSizeOptions, fontOptions);
-	//if (!fontOptions.antialias) binarize(ctx, map, fontOptions);
+	if (!fontOptions.antialias) binarize(ctx, map, fontOptions);
 
 	return {
 		lostChars,
@@ -71,7 +71,6 @@ function binarize(ctx: canvas.SKRSContext2D, map: GlyphLocationMap, fontOptions:
 	const strokeColor = fontOptions.strokeColor ? colorNameToRgb(fontOptions.strokeColor) : undefined;
 
 	Object.values(map).forEach((e: GlyphLocation) => {
-		console.log("e", e);
 		const imageData = ctx.getImageData(e.x, e.y, e.width, e.height);
 		const data = imageData.data;
 		for (let i = 0; i < data.length; i+=4) {
