@@ -1,119 +1,166 @@
-import type { BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
-import * as opentype from "opentype.js";
-import { generateBitmap } from "./generateBitmap";
+import * as fs from "fs";
+import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import * as path from "path";
-import * as fs from "fs";
 import * as canvas from "@napi-rs/canvas";
-import {outputBitmapFont} from "./outputBitmapFont";
+import * as opentype from "opentype.js";
+import PngQuant from "pngquant";
+import { generateBitmapFont } from "./generateBitmap";
+import type { BitmapFontEntryTable, BitmapFontGlyphInfo, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
+import { Readable } from 'node:stream';
 
-export function run (argv: string[]): void {
-    const config = parseArguments(argv);
-    app(config);
+export async function run(argv: string[]): Promise<void> {
+	const config = parseArguments(argv);
+	return app(config);
 }
 
-async function app(param: BmpfontGeneratorCliConfig) {
-    const font = await opentype.load(param.source);
+async function app(param: BmpfontGeneratorCliConfig): Promise<void> {
+	const font = await opentype.load(param.source);
 
-    const fontOptions: FontRenderingOptions = {
-        font,
-        fillColor: param.fill,
-        strokeColor: param.stroke,
-        strokeWidth: param.strokeWidth,
-        antialias: !!param.noAntiAlias
-    };
+	const fontOptions: FontRenderingOptions = {
+		font,
+		fillColor: param.fill,
+		strokeColor: param.stroke,
+		strokeWidth: param.strokeWidth,
+		antialias: !param.noAntiAlias
+	};
 
-    const sizeOptions: SizeOptions = {
-        width: param.fixedWidth,
-        height: param.height,
-        baselineHeight: param.baseine,
-        margin: param.margin,
-    };
+	const sizeOptions: SizeOptions = {
+		fixedWidth: param.fixedWidth,
+		height: param.height,
+		baselineHeight: param.baseine,
+		margin: param.margin,
+	};
 
-    const chars: (string | canvas.Image)[] = param.chars.split("");
-    chars.push(param.missingGlyph ?? "");
+	const chars: string[] = param.chars.split("");
+	const entryTable: BitmapFontEntryTable = chars.reduce((table, ch) => {
+		table[ch.charCodeAt(0)] = ch;
+		return table;
+	}, {} as BitmapFontEntryTable);
+	entryTable.missingGlyph = param.missingGlyph ?? " ";
+	const { canvas, map, resolvedSizeOptions, lostChars } = await generateBitmapFont(entryTable, fontOptions, sizeOptions);
 
-    const { canvas, map, missingGlyph, lostChars, resolvedSizeOption } = await generateBitmap(chars, fontOptions, sizeOptions);
+	if (lostChars.length > 0) {
+		console.log(
+			"WARN: Cannot find " + lostChars.join(",") + " from the given font. " +
+			"Generated image does not include these characters. " +
+			"Try Using other font or characters."
+		);
+	}
 
-    if (param.json) {
-        fs.writeFileSync(
-            param.json,
-            JSON.stringify({map: map, missingGlyph: missingGlyph, width: resolvedSizeOption.width, height: resolvedSizeOption.lineHeight })
-        );
-    }
+	if (param.json) {
+		const missingGlyph = map.missingGlyph;
+		delete map.missingGlyph;
+		await writeFile(
+			param.json,
+			JSON.stringify({
+				map,
+				missingGlyph,
+				width: resolvedSizeOptions.fixedWidth,
+				height: resolvedSizeOptions.lineHeight
+			} satisfies BitmapFontGlyphInfo)
+		);
+	}
 
-    outputBitmapFont(param.output, canvas, param.quality);
-
+	await writeFile(param.output, await toBuffer(canvas, param.quality));
 }
+
+async function toBuffer(cvs: canvas.Canvas, quality?: number): Promise<Buffer> {
+	return new Promise<Buffer>((resolve, reject) => {
+		if (!quality) {
+			try {
+				resolve(cvs.toBuffer("image/png"));
+			} catch (error: any) {
+				reject(error);
+			}
+			return;
+		}
+
+		const pngQuanter = new PngQuant([`--quality=${quality}`, "256"]);
+		const chunks: Buffer[] = [];
+		pngQuanter
+			.on("data", (chunk: Buffer) => chunks.push(chunk))
+			.on("end", () => resolve(Buffer.concat(chunks)))
+			.on("error", (e: Error) => reject(e ?? "error at pngquant"));
+		// TODO: キャストせず渡せる方法を検討する。
+		// write() メンバ関数の型が合わないため、暫定対応としてキャストして渡している。
+		Readable.from(cvs.encodeSync("png")).pipe(pngQuanter as any as NodeJS.WritableStream);
+	});
+}
+
+const defaultChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~";
 
 function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
-    const { values, positionals } = parseArgs({
-        args: argv,
-        allowPositionals: true,
-        options: {
-            help: { type: "boolean", short: "h" },
-            height: { type: "string", short: "H", default: "13" },
-            "fixed-width": { type: "string", short: "w"},
-            chars: { type: "string", short: "c", default: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~"},
-            "chars-file": { type: "string", short: "f"},
-            "missing-glyph": { type: "string", short: "m", },
-            "missing-glyph-image": { type: "string", short: "M"},
-            fill: { type: "string", short: "F", default: "#000000"},
-            stroke: { type: "string", short: "S"},
-            quality: { type: "string", short: "Q"},
-            "stroke-width": { type: "string", default: "1"},
-            baseline: { type: "string"},
-            "no-anti-alias": { type: "boolean"},
-            json: { type: "string" },
-            "no-json": { type: "boolean"},
-            margin: { type: "string", default: "1"},
-        } as const
-    });
+	const { values, positionals } = parseArgs({
+		args: argv.slice(2), // デフォルト値は先頭 2 要素を削った process.argv なので、それに合わせて slice() して渡す
+		allowPositionals: true,
+		options: {
+			help: { type: "boolean", short: "h" },
+			height: { type: "string", short: "H", default: "13" },
+			"fixed-width": { type: "string", short: "w"},
+			chars: { type: "string", short: "c", default: defaultChars},
+			"chars-file": { type: "string", short: "f"},
+			"missing-glyph": { type: "string", short: "m", },
+			"missing-glyph-image": { type: "string", short: "M"},
+			fill: { type: "string", short: "F", default: "#000000"},
+			stroke: { type: "string", short: "S"},
+			quality: { type: "string", short: "Q"},
+			"stroke-width": { type: "string", default: "1"},
+			baseline: { type: "string"},
+			"no-anti-alias": { type: "boolean"},
+			json: { type: "string" },
+			"no-json": { type: "boolean"},
+			margin: { type: "string", default: "1"},
+		} as const
+	});
 
-    if (values.help) {
-        showHelp();
-        process.exit(0);
-    }
+	if (values.help) {
+		showHelp();
+		process.exit(0);
+	}
 
-    if (positionals.length < 4) {
-        console.log("Missing arguments. See help.")
-    }
+	if (positionals.length < 2) {
+		console.log("Missing arguments. See help.");
+	}
 
-    fs.accessSync(positionals[2]);
+	const [source, output] = positionals;
 
-    let chars = values.chars;
-    if (values["chars-file"]) {
-        const listFileContent = fs.readFileSync(values["chars-file"]);
-        chars = listFileContent.toString();
-    }
-    chars = chars.replace(/[\n\r]/g, "");
+	// ファイルが存在しない場合、 opentype に渡す前に自前で確認してエラーを出す
+	fs.accessSync(source);
 
-    let missingGlyph!: canvas.Image;
-    if (values["missing-glyph-image"]) {
-        missingGlyph = new canvas.Image;
-        missingGlyph.src = fs.readFileSync(values["missing-glyph-image"]);
-    }
+	let chars = values.chars;
+	if (values["chars-file"]) {
+		const listFileContent = fs.readFileSync(values["chars-file"]);
+		chars = listFileContent.toString();
+	}
+	chars = chars.replace(/[\n\r]/g, "");
 
-    return {
-        source: positionals[2],
-        output: positionals[3],
-        fixedWidth: values["fixed-width"] ? Number.parseInt(values["fixed-width"]) : undefined,
-        height: Number.parseInt(values.height),
-        chars,
-        missingGlyph: missingGlyph ?? values["missing-glyph"],
-        fill: values.fill,
-        stroke: values.stroke,
-        strokeWidth: Number.parseInt(values["stroke-width"]!),
-        baseine: values.baseline ? Number.parseInt(values.baseline) : undefined,
-        quality: values.quality ? Number.parseInt(values.quality) : undefined,
-        noAntiAlias: values["no-anti-alias"],
-        json: values.json ?? path.join(path.dirname(positionals[3]), path.parse(positionals[3]).name + "_glyphs.json"),
-        margin: Number.parseInt(values.margin)
-    } satisfies BmpfontGeneratorCliConfig;
+	let missingGlyph!: canvas.Image;
+	if (values["missing-glyph-image"]) {
+		missingGlyph = new canvas.Image;
+		missingGlyph.src = fs.readFileSync(values["missing-glyph-image"]);
+	}
+
+	return {
+		source,
+		output,
+		fixedWidth: values["fixed-width"] ? Number.parseInt(values["fixed-width"], 10) : undefined,
+		height: Number.parseInt(values.height, 10),
+		chars,
+		missingGlyph: missingGlyph ?? values["missing-glyph"],
+		fill: values.fill,
+		stroke: values.stroke,
+		strokeWidth: Number.parseInt(values["stroke-width"]!, 10),
+		baseine: values.baseline ? Number.parseInt(values.baseline, 10) : undefined,
+		quality: values.quality ? Number.parseInt(values.quality, 10) : undefined,
+		noAntiAlias: values["no-anti-alias"],
+		json: values.json ?? path.join(path.dirname(output), path.parse(output).name + "_glyphs.json"),
+		margin: Number.parseInt(values.margin, 10)
+	} satisfies BmpfontGeneratorCliConfig;
 }
 
-function showHelp() {
-    console.log(`
+function showHelp(): void {
+	console.log(`
 Usage:
 $ bmpfont-generator font.ttf output.png
 
@@ -121,7 +168,7 @@ Options:
     -V, --version                         output the version number
     -H, --height <size>                   文字の縦サイズ(px) (default: 13)
     -w, --fixed-width <size>              文字の横サイズ(px)。指定した場合、文字の幅に関わらずsizeを幅の値とする
-    -c, --chars <string>                  書き出す文字の羅列 (default: "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}\`~\")
+    -c, --chars <string>                  書き出す文字の羅列 (default: "${defaultChars}\")
     -f, --chars-file <filepath>           書き出す文字が羅列されたテキストファイルのパス
     -m, --missing-glyph <char>            --charsの指定に含まれない文字の代わりに用いる代替文字
     -M, --missing-glyph-image <filepath>  --charsの指定に含まれない文字の代わりに用いる画像ファイルのパス
