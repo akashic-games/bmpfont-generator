@@ -171,15 +171,12 @@ export function calculateCanvasSize(
 	const advanceHeight = options.lineHeight + options.margin;
 
 	// 文字が入りきる、かつ、縦横のマージン幅を納めることができる正方形の辺の長さを求める
-	function judgeCanvascapable(canvasSquareSideSize: number) {
-		const surPlusX = canvasSquareSideSize % averageAdvanceWidth;
-		const surPlusY = canvasSquareSideSize % advanceHeight;
-
-		const capacityX = Math.floor(canvasSquareSideSize / averageAdvanceWidth);
-		const capacityY = Math.floor(canvasSquareSideSize / advanceHeight);
-		return capacityX * capacityY > renderablesCount && (surPlusX >= options.margin && (surPlusY >= options.margin));
+	function hasEnoughSpace(canvasSquareSideSize: number): boolean {
+		const capacityX = Math.floor((canvasSquareSideSize - options.margin) / averageAdvanceWidth);
+		const capacityY = Math.floor((canvasSquareSideSize - options.margin) / advanceHeight);
+		return capacityX * capacityY > renderablesCount;
 	}
-	while (!judgeCanvascapable(canvasSquareSideSize)) {
+	while (!hasEnoughSpace(canvasSquareSideSize)) {
 		canvasSquareSideSize *= 2;
 	}
 	const canvasWidth = canvasSquareSideSize;
@@ -188,7 +185,8 @@ export function calculateCanvasSize(
 		// canvasWidthから左端のmarginを除いた幅を、1文字に必要な字幅とmarginの合計で割ってその1行に収めることができる文字数を出し、
 		// 文字数全体との徐とadvanceHeightの積が文字全数の描画に必要なキャンバス高さになる
 		// 縦横ともにmarginは1つ余分に必要
-		const rawCanvasHeight = Math.ceil(renderablesCount / Math.floor((canvasWidth - options.margin) / averageAdvanceWidth)) * advanceHeight + options.margin;
+		const rawCanvasHeight =
+			Math.ceil(renderablesCount / Math.floor((canvasWidth - options.margin) / averageAdvanceWidth)) * advanceHeight + options.margin;
 		const ceiledCanvasHeight  = Math.ceil(rawCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 		return { width : canvasSquareSideSize, height: ceiledCanvasHeight };
 	}
@@ -204,6 +202,6 @@ export function calculateCanvasSize(
 		drawX += g.width + options.margin;
 	});
 	drawY += options.margin;
-	const ceiledDrawY = Math.ceil(drawY / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
-	return { width: canvasWidth, height: ceiledDrawY };
+	const canvasHeight  = Math.ceil(drawY / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
+	return { width: canvasWidth, height: canvasHeight  };
 }
