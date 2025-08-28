@@ -44,9 +44,9 @@ describe("generator.draw", function() {
         };
         await testExpectElements(answerJson, args);
         mock.restore();
-
     });
 
+    // TODO: アンチエイリアス機能のマージ後にテストケースのファイルを再生成し参照するよう修正する
     xit("normal scenario with no AntiAlias", async function() {
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus.png"));
