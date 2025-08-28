@@ -28,7 +28,6 @@ export function generateBitmapFont(
 
 	const renderableTable = createAndInsertImageRenderableTable(glyphRenderableTable, imageEntryTable, resolvedSizeOptions);
 	const canvasSize = calculateCanvasSize(renderableTable, resolvedSizeOptions);
-	console.log("canvasSize", canvasSize);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
 
