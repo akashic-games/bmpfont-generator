@@ -52,8 +52,8 @@ function draw(
 
 	Object.keys(renderableTable).forEach(key => {
 		const renderable = renderableTable[key];
-		const width = resolvedSizeOption.fixedWidth ?? renderable.width + resolvedSizeOption.margin;
-		if (drawX + width > ctx.canvas.width) {
+		const width = resolvedSizeOption.fixedWidth ?? renderable.width;
+		if (drawX + width + resolvedSizeOption.margin > ctx.canvas.width) {
 			drawX = resolvedSizeOption.margin;
 			drawY += resolvedSizeOption.lineHeight + resolvedSizeOption.margin;
 		}
@@ -62,7 +62,7 @@ function draw(
 			ctx.drawImage(renderable.image, drawX, drawY, renderable.width, resolvedSizeOption.lineHeight);
 		} else {
 			const path = renderable.glyph.getPath(
-				drawX + (width / 2) - (renderable.width / 2), drawY + resolvedSizeOption.baselineHeight, resolvedSizeOption.height);
+				drawX, drawY + resolvedSizeOption.baselineHeight, resolvedSizeOption.height);
 			path.fill = fontOptions.fillColor;
 			path.stroke = fontOptions.strokeColor || null;
 			path.strokeWidth = fontOptions.strokeWidth;
@@ -160,7 +160,7 @@ export function calculateCanvasSize(
 	options: ResolvedSizeOptions
 ): CanvasSize {
 	const widthList = Object.values(renderableTable);
-	const averageWidth = options.fixedWidth ?? widthList.reduce((acc, g) => acc + g.width + options.margin, 0) / widthList.length;
+	const averageWidth = options.fixedWidth ?? widthList.reduce((acc, g) => acc + g.width, 0) / widthList.length;
 	const renderablesCount = widthList.length;
 	const MULTIPLE_OF_CANVAS_HEIGHT = 4;
 
@@ -169,15 +169,23 @@ export function calculateCanvasSize(
 	const averageAdvanceWidth = averageWidth + options.margin;
 	const advanceHeight = options.lineHeight + options.margin;
 
-	// 平均の幅から、大まかに文字が入り切る正方形の辺の長さを求める
-	while ((canvasSquareSideSize / averageAdvanceWidth) * (canvasSquareSideSize / advanceHeight) < renderablesCount) {
+	// 文字が入りきる、かつ、縦横のマージン幅を納めることができる正方形の辺の長さを求める
+	function hasEnoughSpace(canvasSquareSideSize: number): boolean {
+		const capacityX = Math.floor((canvasSquareSideSize - options.margin) / averageAdvanceWidth);
+		const capacityY = Math.floor((canvasSquareSideSize - options.margin) / advanceHeight);
+		return capacityX * capacityY > renderablesCount;
+	}
+	while (!hasEnoughSpace(canvasSquareSideSize)) {
 		canvasSquareSideSize *= 2;
 	}
 	const canvasWidth = canvasSquareSideSize;
 
-	// 固定幅の場合: 幅が決まれば高さも単純に計算できる
 	if (options.fixedWidth) {
-		const rawCanvasHeight = Math.ceil(renderablesCount / Math.floor(canvasWidth / averageAdvanceWidth)) * advanceHeight;
+		// canvasWidthから左端のmarginを除いた幅を、1文字に必要な字幅とmarginの合計で割ってその1行に収めることができる文字数を出し、
+		// 文字数全体との徐とadvanceHeightの積が文字全数の描画に必要なキャンバス高さになる
+		// 縦横ともにmarginは1つ余分に必要
+		const rawCanvasHeight =
+			Math.ceil(renderablesCount / Math.floor((canvasWidth - options.margin) / averageAdvanceWidth)) * advanceHeight + options.margin;
 		const ceiledCanvasHeight  = Math.ceil(rawCanvasHeight / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 		return { width : canvasSquareSideSize, height: ceiledCanvasHeight };
 	}
@@ -193,5 +201,6 @@ export function calculateCanvasSize(
 		drawX += g.width + options.margin;
 	});
 	drawY += options.margin;
-	return { width: canvasWidth, height: drawY };
+	const canvasHeight  = Math.ceil(drawY / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
+	return { width: canvasWidth, height: canvasHeight };
 }
