@@ -62,7 +62,6 @@ export interface SizeOptions {
 /**
  * ビットマップフォントを出力するために必要な情報。フォント情報や書き出す文字から、各種値を算出したもの。
  * Renderableを描画するために実際に必要な情報。
- *
  */
 export interface ResolvedSizeOptions extends SizeOptions {
 	baselineHeight: number;
