@@ -197,7 +197,7 @@ export function calculateCanvasSize(
 	return { width: canvasWidth, height: drawY };
 }
 
-function validateCanvasSize(canvasSize: CanvasSize) {
+function validateCanvasSize(canvasSize: CanvasSize): void {
 	if (canvasSize.width > 8192 || canvasSize.height > 8192) throw new Error("list is too long");
 	if (canvasSize.width === 0 || canvasSize.height === 0) throw new Error("requested size is too small");
 }
