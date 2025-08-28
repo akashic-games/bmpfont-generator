@@ -30,8 +30,8 @@ describe("calculateCanvasSize", function() {
 		descend: -3
 	}
 
-	const esolvedSizeOptionsFixed = JSON.parse(JSON.stringify(resolvedSizeOptions));
-	esolvedSizeOptionsFixed.fixedWidth = 10;
+	const resolvedSizeOptionsFixed = JSON.parse(JSON.stringify(resolvedSizeOptions));
+	resolvedSizeOptionsFixed.fixedWidth = 10;
 
 	const abcdefghWdith = [
 		{ width: 7 }, // a
@@ -45,25 +45,25 @@ describe("calculateCanvasSize", function() {
 	];
 
 	it("no fixed", function() {
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 1), resolvedSizeOptions)).toEqual({ width: 16, height: 15 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 2), resolvedSizeOptions)).toEqual({ width: 32, height: 15 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 3), resolvedSizeOptions)).toEqual({ width: 32, height: 15 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 4), resolvedSizeOptions)).toEqual({ width: 32, height: 29 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 5), resolvedSizeOptions)).toEqual({ width: 32, height: 29 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 6), resolvedSizeOptions)).toEqual({ width: 32, height: 29 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 7), resolvedSizeOptions)).toEqual({ width: 32, height: 43 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 8), resolvedSizeOptions)).toEqual({ width: 64, height: 29 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 1), resolvedSizeOptions)).toEqual({ width: 32, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 2), resolvedSizeOptions)).toEqual({ width: 32, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 3), resolvedSizeOptions)).toEqual({ width: 32, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 4), resolvedSizeOptions)).toEqual({ width: 32, height: 32 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 5), resolvedSizeOptions)).toEqual({ width: 32, height: 32 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 6), resolvedSizeOptions)).toEqual({ width: 64, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 7), resolvedSizeOptions)).toEqual({ width: 64, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 8), resolvedSizeOptions)).toEqual({ width: 64, height: 32 });
 	});
 
-	it("no fixed", function() {
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 1), esolvedSizeOptionsFixed)).toEqual({ width: 16, height: 16 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 2), esolvedSizeOptionsFixed)).toEqual({ width: 32, height: 16 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 3), esolvedSizeOptionsFixed)).toEqual({ width: 32, height: 28 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 4), esolvedSizeOptionsFixed)).toEqual({ width: 32, height: 28 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 5), esolvedSizeOptionsFixed)).toEqual({ width: 32, height: 44 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 6), esolvedSizeOptionsFixed)).toEqual({ width: 32, height: 44 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 7), esolvedSizeOptionsFixed)).toEqual({ width: 64, height: 28 });
-		expect(calculateCanvasSize(abcdefghWdith.slice(0, 8), esolvedSizeOptionsFixed)).toEqual({ width: 64, height: 28 });
+	it("fixed", function() {
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 1), resolvedSizeOptionsFixed)).toEqual({ width: 32, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 2), resolvedSizeOptionsFixed)).toEqual({ width: 32, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 3), resolvedSizeOptionsFixed)).toEqual({ width: 32, height: 32 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 4), resolvedSizeOptionsFixed)).toEqual({ width: 64, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 5), resolvedSizeOptionsFixed)).toEqual({ width: 64, height: 16 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 6), resolvedSizeOptionsFixed)).toEqual({ width: 64, height: 32 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 7), resolvedSizeOptionsFixed)).toEqual({ width: 64, height: 32 });
+		expect(calculateCanvasSize(abcdefghWdith.slice(0, 8), resolvedSizeOptionsFixed)).toEqual({ width: 64, height: 32 });
 	});
 })
 
