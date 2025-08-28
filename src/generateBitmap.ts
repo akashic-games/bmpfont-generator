@@ -203,5 +203,5 @@ export function calculateCanvasSize(
 	});
 	drawY += options.margin;
 	const canvasHeight  = Math.ceil(drawY / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
-	return { width: canvasWidth, height: canvasHeight  };
+	return { width: canvasWidth, height: canvasHeight };
 }
