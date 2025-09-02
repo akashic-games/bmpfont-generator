@@ -70,7 +70,7 @@ function binarize(ctx: canvas.SKRSContext2D, map: GlyphLocationMap, fontOptions:
 	Object.values(map).forEach((e: GlyphLocation) => {
 		const imageData = ctx.getImageData(e.x, e.y, e.width, e.height);
 		const data = imageData.data;
-		for (let i = 0; i < data.length; i+=4) {
+		for (let i = 0; i < data.length; i += 4) {
 			const alpha = data[i + 3];
 			if (alpha < threshold) {
 				data[i + 3] = 0;
