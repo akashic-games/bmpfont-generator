@@ -41,8 +41,6 @@ export function generateBitmapFont(
 	};
 }
 
-type RgbColor = { r: number; g: number; b: number };
-
 function colorNameToRgb(color: string): Uint8ClampedArray<ArrayBuffer> {
 	const cvs = canvas.createCanvas(1, 1);
 	const ctx = cvs.getContext("2d");
@@ -78,7 +76,6 @@ function binarize(ctx: canvas.SKRSContext2D, map: GlyphLocationMap, fontOptions:
 				data[i + 3] = 0;
 				continue;
 			};
-			const pixelRgb = {r: data[i], g: data[i + 1], b: data[i + 2]};
 			let color = fillColor;
 			if (strokeColor &&
 				calcColorDistance(data.slice(i, 3), fillColor) > calcColorDistance(data.slice(i, 3), strokeColor)
