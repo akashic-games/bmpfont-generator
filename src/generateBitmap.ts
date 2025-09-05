@@ -15,6 +15,7 @@ import type {
 	CanvasSize,
 	RenderableBase,
 	CollectGlyphRenderablesResult,
+	GlyphLocation,
 } from "./type";
 
 export function generateBitmapFont(
@@ -28,16 +29,65 @@ export function generateBitmapFont(
 	const canvasSize = calculateCanvasSize(renderableTable, resolvedSizeOptions);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
-	// TODO: 別途対応するまで暫定的にコメントアウト
-	// if (!fontOptions.antialias) ctx.antialias = "none";
 
 	const map = draw(ctx, renderableTable, resolvedSizeOptions, fontOptions);
+	if (!fontOptions.antialias) binarize(ctx, map, fontOptions);
+
 	return {
 		lostChars,
 		resolvedSizeOptions,
 		canvas: cvs,
 		map
 	};
+}
+
+function colorNameToRgb(color: string): Uint8ClampedArray<ArrayBuffer> {
+	const cvs = canvas.createCanvas(1, 1);
+	const ctx = cvs.getContext("2d");
+	ctx.fillStyle = color;
+	ctx.fillRect(0, 0, 1, 1);
+	const data = ctx.getImageData(0, 0, 1, 1).data;
+	return data.slice(0, 3);
+}
+
+function calcColorDistance(
+	color0: Uint8ClampedArray<ArrayBuffer>,
+	color1: Uint8ClampedArray<ArrayBuffer>
+): number {
+	return (
+		// NOTE: 色ベクトル同士の大きさを比較できれば良いので、sqrtで厳密な平方根を求める必要はない
+		Math.pow(color0[0] - color1[0], 2) +
+		Math.pow(color0[1] - color1[1], 2) +
+		Math.pow(color0[2] - color1[2], 2)
+	);
+}
+
+function binarize(ctx: canvas.SKRSContext2D, map: GlyphLocationMap, fontOptions: FontRenderingOptions): void {
+	const threshold = 129;
+	const fillColor = colorNameToRgb(fontOptions.fillColor);
+	const strokeColor = fontOptions.strokeColor ? colorNameToRgb(fontOptions.strokeColor) : undefined;
+
+	Object.values(map).forEach((e: GlyphLocation) => {
+		const imageData = ctx.getImageData(e.x, e.y, e.width, e.height);
+		const data = imageData.data;
+		for (let i = 0; i < data.length; i += 4) {
+			const alpha = data[i + 3];
+			if (alpha < threshold) {
+				data[i + 3] = 0;
+				continue;
+			};
+			let color = fillColor;
+			const targetColor = data.slice(i, 3);
+			if (strokeColor &&
+				calcColorDistance(targetColor, fillColor) > calcColorDistance(targetColor, strokeColor)
+			) color = strokeColor;
+			data[i] = color[0];
+			data[i + 1] = color[1];
+			data[i + 2] = color[2];
+			data[i + 3] = 255;
+		}
+		ctx.putImageData(imageData, e.x, e.y);
+	});
 }
 
 function draw(
