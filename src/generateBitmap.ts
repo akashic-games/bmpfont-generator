@@ -192,9 +192,9 @@ export function resolveSizeOptions(
 		return prev;
 	}, { descend: Infinity, baseline: -Infinity });
 
-	const baselineHeight = metrics.baseline;
+	const baselineHeight = sizeOptions.baselineHeight ?? metrics.baseline;
 	const descend = metrics.descend;
-	const requiredHeight = baselineHeight + descend;
+	const requiredHeight = baselineHeight + Math.abs(descend);
 	const lineHeight = Math.max(requiredHeight, sizeOptions.height);
 	return {
 		...sizeOptions,
