@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { writeFile } from "node:fs/promises";
+import { Readable } from "node:stream";
 import { parseArgs } from "node:util";
 import * as path from "path";
 import * as canvas from "@napi-rs/canvas";
@@ -7,7 +8,6 @@ import * as opentype from "opentype.js";
 import PngQuant from "pngquant";
 import { generateBitmapFont } from "./generateBitmap";
 import type { BitmapFontEntryTable, BitmapFontGlyphInfo, BmpfontGeneratorCliConfig, FontRenderingOptions, SizeOptions } from "./type";
-import { Readable } from 'node:stream';
 
 export async function run(argv: string[]): Promise<void> {
 	const config = parseArguments(argv);
