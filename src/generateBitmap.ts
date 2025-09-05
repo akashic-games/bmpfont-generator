@@ -77,8 +77,9 @@ function binarize(ctx: canvas.SKRSContext2D, map: GlyphLocationMap, fontOptions:
 				continue;
 			};
 			let color = fillColor;
+			const targetColor = data.slice(i, 3);
 			if (strokeColor &&
-				calcColorDistance(data.slice(i, 3), fillColor) > calcColorDistance(data.slice(i, 3), strokeColor)
+				calcColorDistance(targetColor, fillColor) > calcColorDistance(targetColor, strokeColor)
 			) color = strokeColor;
 			data[i] = color[0];
 			data[i + 1] = color[1];
