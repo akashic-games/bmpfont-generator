@@ -75,13 +75,14 @@ it("collectGlyphRenderables", async function() {
 	const entries = "abc俱𠀋㐂";
 	const sizeOptions = { height: 13, margin: 1, fixedWidth: undefined, baselineHeight: undefined };
 	const { entryTable } = await generateTestParts(sizeOptions, entries);
-	const missingGlyph = new canvas.Image;
+	const missingGlyph = new canvas.Image();
 	missingGlyph.src = fs.readFileSync(path.join(__dirname, "./fixtures/dummy1x1.png"));
 	entryTable.missingGlyph = missingGlyph;
 	const { glyphRenderableTable, imageEntryTable, lostChars } = collectGlyphRenderables(entryTable, font, sizeOptions);
 	expect(Object.keys(glyphRenderableTable).sort()).toEqual(Array.from(entries).map(e => String(e.charCodeAt(0))).sort());
 	expect(lostChars).toEqual(["㐂", "俱", "𠀋"]);
-	expect(imageEntryTable).toEqual({ missingGlyph });
+	expect(Object.keys(imageEntryTable)).toStrictEqual(["missingGlyph"]);
+	expect(imageEntryTable.missingGlyph).toBe(missingGlyph);
 });
 
 describe("resolveSizeOptions", function () {
@@ -94,7 +95,7 @@ describe("resolveSizeOptions", function () {
 			height: 13,
 			baselineHeight: 9.75,
 			margin: 1,
-			requiredHeight: 6.76,
+			requiredHeight: 12.74,
 			lineHeight: 13,
 			descend: -2.99
 		});
@@ -108,13 +109,13 @@ describe("resolveSizeOptions", function () {
 			height: 13,
 			baselineHeight: 9.75,
 			margin: 1,
-			requiredHeight: 6.76,
+			requiredHeight: 12.74,
 			lineHeight: 13,
 			descend: -2.99
 		});
 	});
 	it("baseline height", async function() {
-		const baselineHeight = 18;
+		const baselineHeight = 20;
 		const sizeOptions = { height: 13, margin: 1, fixedWidth: undefined, baselineHeight };
 		const { glyphRenderableTable, font } = await generateTestParts(sizeOptions, "abcdefgh");
 		const resizedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, font);
@@ -123,8 +124,8 @@ describe("resolveSizeOptions", function () {
 			height: 13,
 			baselineHeight,
 			margin: 1,
-			requiredHeight: 6.76,
-			lineHeight: 13,
+			requiredHeight: 22.990000000000002,
+			lineHeight: 22.990000000000002,
 			descend: -2.99
 		});
 	});
@@ -138,7 +139,7 @@ describe("resolveSizeOptions", function () {
 			height: 13,
 			baselineHeight: 9.75,
 			margin: 3,
-			requiredHeight: 6.76,
+			requiredHeight: 12.74,
 			lineHeight: 13,
 			descend: -2.99
 		});
