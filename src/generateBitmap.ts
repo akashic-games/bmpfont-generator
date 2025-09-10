@@ -192,9 +192,10 @@ export function resolveSizeOptions(
 		return prev;
 	}, { descend: Infinity, baseline: -Infinity });
 
-	const baselineHeight = metrics.baseline;
+	const baselineHeight = sizeOptions.baselineHeight ?? metrics.baseline;
 	const descend = metrics.descend;
-	const requiredHeight = baselineHeight + descend;
+	// baseline の上側が正なので、通常 descend は負である。ここでは高さを求めるため引く
+	const requiredHeight = baselineHeight - descend;
 	const lineHeight = Math.max(requiredHeight, sizeOptions.height);
 	return {
 		...sizeOptions,
