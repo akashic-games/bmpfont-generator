@@ -8,20 +8,20 @@ import type { BmpfontGeneratorCliConfig } from "../src/type";
 
 const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPQRSTUVWXYZ !?#$%^&*()-_=+/<>,.;:'\"[]{}`~";
 
-function compareImage(ImagePath1: string, ImagePath2: string): boolean {
-    const img1 = PNG.sync.read(fs.readFileSync(ImagePath1));
-    const img2 = PNG.sync.read(fs.readFileSync(ImagePath2));
+function compareImage(image1Buffer: Buffer, image2Buffer: Buffer): boolean {
+    const img1 = PNG.sync.read(image1Buffer);
+    const img2 = PNG.sync.read(image2Buffer);
     const numDiffPixels = pixelmatch(img1.data, img2.data, null, img1.width, img1.height);
-    return numDiffPixels === 0;
+    return numDiffPixels === 0 && (img1.width === img2.width && img1.height === img2.height);
 }
 
-async function testExpectElements(answerJson: any, args: BmpfontGeneratorCliConfig) {
+async function testExpectElements(answerJson: any, answerPng: Buffer, args: BmpfontGeneratorCliConfig) {
     await app(args);
     const resultJson = JSON.parse(
         fs.readFileSync(path.resolve(__dirname, "../", "out_glyphs.json"), "utf8")
     );
     expect(resultJson).toEqual(answerJson);
-    expect(compareImage("result.png", "answer.png")).toBe(true);
+    expect(compareImage(fs.readFileSync(args.output), answerPng)).toBe(true);
 }
 
 describe("generator.draw", function() {
@@ -29,7 +29,6 @@ describe("generator.draw", function() {
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus.png"));
         mock({
-            "answer.png": answer,
             "font.ttf": fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"))
         });
         const args: BmpfontGeneratorCliConfig = {
@@ -42,7 +41,7 @@ describe("generator.draw", function() {
             source: "font.ttf",
             strokeWidth: 1
         };
-        await testExpectElements(answerJson, args);
+        await testExpectElements(answerJson, answer, args);
         mock.restore();
     });
 
@@ -51,7 +50,6 @@ describe("generator.draw", function() {
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus.png"));
         mock({
-            "answer.png": answer,
             "font.ttf": fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"))
         });
         const args: BmpfontGeneratorCliConfig = {
@@ -65,7 +63,7 @@ describe("generator.draw", function() {
             strokeWidth: 1,
             noAntiAlias: true
         };
-        await testExpectElements(answerJson, args);
+        await testExpectElements(answerJson, answer, args);
         mock.restore();
     });
 
@@ -73,7 +71,6 @@ describe("generator.draw", function() {
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-color_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-color.png"));
         mock({
-            "answer.png": answer,
             "font.ttf": fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf")),
         });
         const args: BmpfontGeneratorCliConfig = {
@@ -86,7 +83,7 @@ describe("generator.draw", function() {
             source: "font.ttf",
             strokeWidth: 1
         };
-        await testExpectElements(answerJson, args);
+        await testExpectElements(answerJson, answer, args);
         mock.restore();
     });
 
@@ -94,7 +91,6 @@ describe("generator.draw", function() {
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-stroke_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-stroke.png"));
         mock({
-            "answer.png": answer,
             "font.ttf": fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"))
         });
         const args: BmpfontGeneratorCliConfig = {
@@ -110,7 +106,7 @@ describe("generator.draw", function() {
             source: "font.ttf",
             strokeWidth: 1
         };
-        await testExpectElements(answerJson, args);
+        await testExpectElements(answerJson, answer, args);
         mock.restore();
     });
 
@@ -118,7 +114,6 @@ describe("generator.draw", function() {
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-stroke-width_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-stroke-width.png"));
         mock({
-            "answer.png": answer,
             "font.ttf": fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"))
         });
         const args: BmpfontGeneratorCliConfig = {
@@ -134,7 +129,7 @@ describe("generator.draw", function() {
             source: "font.ttf",
             strokeWidth: 2
         };
-        await testExpectElements(answerJson, args);
+        await testExpectElements(answerJson, answer, args);
         mock.restore();
     });
 
@@ -181,7 +176,6 @@ describe("generator.draw", function() {
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-defaultMG_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-defaultMG.png"));
         mock({
-            "answer.png": answer,
             "font.ttf": fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"))
         });
         const args: BmpfontGeneratorCliConfig = {
@@ -200,7 +194,7 @@ describe("generator.draw", function() {
             source: "font.ttf",
             strokeWidth: 2
         };
-        await testExpectElements(answerJson, args);
+        await testExpectElements(answerJson, answer, args);
         mock.restore();
     });
 });
