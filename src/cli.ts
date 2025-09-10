@@ -137,7 +137,7 @@ function parseArguments(argv: string[]): BmpfontGeneratorCliConfig {
 
 	let missingGlyph!: canvas.Image;
 	if (values["missing-glyph-image"]) {
-		missingGlyph = new canvas.Image;
+		missingGlyph = new canvas.Image();
 		missingGlyph.src = fs.readFileSync(values["missing-glyph-image"]);
 	}
 
