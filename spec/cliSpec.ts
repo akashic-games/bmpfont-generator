@@ -50,10 +50,9 @@ describe("generator.draw", function() {
 		mock.restore();
 	});
 
-	// TODO: アンチエイリアス機能のマージ後にテストケースのファイルを再生成し参照するよう修正する
-	xit("normal scenario with no AntiAlias", async function() {
-		const answerJson = require(path.resolve(__dirname, "fixtures/mplus_glyphs.json"));
-		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus.png"));
+	it("normal scenario with no AntiAlias", async function() {
+		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-antialias_glyphs.json"));
+		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-antialias.png"));
 		mock({
 			"font.ttf": fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-1c-light.ttf"))
 		});
@@ -190,7 +189,6 @@ describe("generator.draw", function() {
 			fill: "#000000",
 			stroke: undefined,
 			height: 20,
-			// fixedWidth: undefined,
 			json: "out_glyphs.json",
 			noAntiAlias: false,
 			margin: 1,
