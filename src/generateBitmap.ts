@@ -27,6 +27,7 @@ export function generateBitmapFont(
 	const resolvedSizeOptions: ResolvedSizeOptions = resolveSizeOptions(glyphRenderableTable, sizeOptions, fontOptions.font);
 	const renderableTable = createAndInsertImageRenderableTable(glyphRenderableTable, imageEntryTable, resolvedSizeOptions);
 	const canvasSize = calculateCanvasSize(renderableTable, resolvedSizeOptions);
+	validateCanvasSize(canvasSize);
 	const cvs = canvas.createCanvas(canvasSize.width, canvasSize.height);
 	const ctx = cvs.getContext("2d");
 
@@ -254,4 +255,9 @@ export function calculateCanvasSize(
 	drawY += options.margin;
 	const canvasHeight  = Math.ceil(drawY / MULTIPLE_OF_CANVAS_HEIGHT) * MULTIPLE_OF_CANVAS_HEIGHT;
 	return { width: canvasWidth, height: canvasHeight };
+}
+
+function validateCanvasSize(canvasSize: CanvasSize): void {
+	if (canvasSize.width > 8192 || canvasSize.height > 8192) throw new Error("list is too long");
+	if (canvasSize.width === 0 || canvasSize.height === 0) throw new Error("requested size is too small");
 }

@@ -10,6 +10,9 @@ module.exports = [
                 project: "tsconfig.eslint.json",
             },
         },
-        ignores: ["**/*.js"]
-    }
+        ignores: ["**/*.js"],
+        rules: {
+            "@typescript-eslint/no-var-requires": "off"
+        }
+    },
 ];
