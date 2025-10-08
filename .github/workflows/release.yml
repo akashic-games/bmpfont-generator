@@ -25,7 +25,7 @@ jobs:
           npm ci
           npm run build
           npm test
-          npm shrinkwrap 
+          npm shrinkwrap
       - name: Publish and Release
         uses: akashic-games/action-release@v2
         with:
