@@ -26,7 +26,8 @@
     "README.md",
     "package.json",
     "bin",
-    "lib"
+    "lib",
+    "npm-shrinkwrap.json"
   ],
   "author": "DWANGO Co., Ltd.",
   "license": "MIT",

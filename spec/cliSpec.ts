@@ -31,6 +31,7 @@ describe("generator.draw", function() {
 	});
 
 	it("normal scenario", async function() {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus.png"));
 		mock({
@@ -51,6 +52,7 @@ describe("generator.draw", function() {
 	});
 
 	it("normal scenario with no AntiAlias", async function() {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-antialias_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-antialias.png"));
 		mock({
@@ -72,6 +74,7 @@ describe("generator.draw", function() {
 	});
 
 	it("normal scenario with color", async function() {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-color_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-color.png"));
 		mock({
@@ -92,6 +95,7 @@ describe("generator.draw", function() {
 	});
 
 	it("normal scenario with stroke", async function() {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-stroke_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-stroke.png"));
 		mock({
@@ -115,6 +119,7 @@ describe("generator.draw", function() {
 	});
 
 	it("normal scenario with stroke and strokeWidth", async function() {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-stroke-width_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-stroke-width.png"));
 		mock({
@@ -177,6 +182,7 @@ describe("generator.draw", function() {
 	});
 
 	it("generateBitmapFont defaultMissingGlyph", async function() {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const answerJson = require(path.resolve(__dirname, "fixtures/mplus-defaultMG_glyphs.json"));
 		const answer = fs.readFileSync(path.resolve(__dirname, "fixtures/mplus-defaultMG.png"));
 		mock({
