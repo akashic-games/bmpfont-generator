@@ -3,13 +3,16 @@ const eslintConfig = require("@akashic/eslint-config");
 module.exports = [
     ...eslintConfig,
     {
-        files: ["src/**/*.ts"],
+        files: ["src/**/*.ts", "spec/**/*.ts"],
         languageOptions: {
             sourceType: "module",
             parserOptions: {
-                project: "tsconfig.json",
+                project: "tsconfig.eslint.json",
             },
         },
-        ignores: ["**/*.js"]
-    }
+        ignores: ["**/*.js"],
+        rules: {
+            "@typescript-eslint/no-var-requires": "off"
+        }
+    },
 ];
