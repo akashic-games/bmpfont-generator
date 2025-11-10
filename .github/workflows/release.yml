@@ -47,4 +47,3 @@ jobs:
         uses: akashic-games/action-release@14c9885ffa51f0f5b8590da0d0139b577bebefcf # v3.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          npm_token: "dummy" # action-release の内部で利用しているライブラリが npm トークンを必須としているためダミーを設定
