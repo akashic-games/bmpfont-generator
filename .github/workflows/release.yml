@@ -24,23 +24,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - name: Make value for before option
-        id: date-value
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b #v7.1.0
-        with:
-          script: |
-            const dt = new Date()
-            dt.setDate(dt.getDate() - 7)
-            const beforeDate = dt.toLocaleDateString("ja-JP", {year: "numeric", month: "2-digit", day: "2-digit"}).replaceAll('/', '-')
-            return beforeDate
-          result-encoding: string
+      - name: action-install
+        uses: akashic-games/action-install@8037b5063b95738aee6cf9bc8c6df1026cd4262d #v1.0.0
       - name: Prepare
         run: |
-          npm i --before ${{ steps.date-value.outputs.result }}
-          if [[ `git status --porcelain` ]]; then
-            echo "- npm install results in changes!"
-            exit 1
-          fi
           npm test
           npm shrinkwrap
       - name: Publish and Release
