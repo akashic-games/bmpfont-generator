@@ -24,10 +24,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - name: action-install
-        uses: akashic-games/action-install@8037b5063b95738aee6cf9bc8c6df1026cd4262d #v1.0.0
       - name: Prepare
         run: |
+          npm ci
           npm test
           npm shrinkwrap
       - name: Publish and Release
